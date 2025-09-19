@@ -17,6 +17,9 @@ body { font-family: Arial; background:#111; color:#fff; text-align:center; }
 #log { height:120px; overflow-y:auto; border:1px solid #fff; padding:5px; text-align:left; }
 button { margin:5px; padding:8px 12px; }
 .hidden { display:none; }
+#gameControls { margin-top:10px; }
+#skillTreeModal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:#222; border:2px solid #fff; padding:20px; z-index:100; width:300px; max-height:400px; overflow:auto; }
 </style>
 </head>
 <body>
@@ -50,12 +53,24 @@ button { margin:5px; padding:8px 12px; }
 <div id="inventory" class="hidden"></div>
 <div id="log" class="hidden"></div>
 
+<div id="gameControls" class="hidden">
+    <button onclick="donate()">💎 Пополнить счёт (+VIP)</button>
+    <button onclick="openSkillTree()">🧙 Открыть древо навыков</button>
+</div>
+
+<div id="skillTreeModal" class="hidden">
+    <h3>Древо навыков</h3>
+    <div id="skillsList"></div>
+    <div>Очки навыков: <span id="skillPoints">0</span></div>
+    <button onclick="closeSkillTree()">Закрыть</button>
+</div>
+
 <script>
 // Игрок
 let player = {
     x:2,y:2,hp:100,maxHp:100,mp:50,maxMp:50,exp:0,nextLevelExp:100,
     level:1,coins:0,vipLevel:0,inventory:[],equipment:{weapon:null,shield:null,armor:null},
-    class:'',gender:''
+    class:'',gender:'',skillPoints:0, skills:{strength:0,agility:0,intelligence:0}
 };
 
 // Карта
@@ -67,8 +82,7 @@ for(let y=0;y<5;y++){
     for(let x=0;x<5;x++){
         const tile=document.createElement("div");
         tile.className="tile";
-        // Реальные картинки тайлов карты
-        tile.style.backgroundImage="url('https://i.imgur.com/Nl1lG2p.png')"; // пример тайла
+        tile.style.backgroundImage="url('https://i.imgur.com/Nl1lG2p.png')";
         tile.style.left=x*tileSize+"px";
         tile.style.top=y*tileSize+"px";
         mapDiv.appendChild(tile);
@@ -122,6 +136,7 @@ function checkSelectionComplete(){
         document.getElementById("status").classList.remove("hidden");
         document.getElementById("inventory").classList.remove("hidden");
         document.getElementById("log").classList.remove("hidden");
+        document.getElementById("gameControls").classList.remove("hidden");
         updateCharacterImage();
         initGameObjects();
         log(`Вы выбрали: ${player.class}, пол: ${player.gender}`);
@@ -130,7 +145,7 @@ function checkSelectionComplete(){
 
 // Обновление картинки персонажа
 function updateCharacterImage(){
-    let img='https://i.imgur.com/4c6wqdn.png'; // Воин мужской
+    let img='https://i.imgur.com/4c6wqdn.png';
     if(player.class=='Mage') img='https://i.imgur.com/5Uq2KHu.png';
     if(player.class=='Archer') img='https://i.imgur.com/1vTtOkM.png';
     if(player.gender=='female'){
@@ -143,45 +158,168 @@ function updateCharacterImage(){
 
 // Объекты игры
 let monsters=[],loots=[],shops=[];
-function spawnMonster(x,y,img="https://i.imgur.com/EhFz7ON.png"){
-    const div=document.createElement("div"); div.className="monster"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
-    div.innerHTML=`<img src="${img}">`; mapDiv.appendChild(div); monsters.push({x,y,div}); log(`Монстр на (${x},${y})`);
-}
+let monstersData = [
+    {x:0, y:0, name:"Гоблин", hp:50, maxHp:50, exp:20, coins:10, img:"https://i.imgur.com/EhFz7ON.png"},
+    {x:4, y:4, name:"Орк", hp:100, maxHp:100, exp:50, coins:30, img:"https://i.imgur.com/2aXlQ9m.png"},
+    {x:1, y:3, name:"Скелет", hp:40, maxHp:40, exp:15, coins:5, img:"https://i.imgur.com/XtZ0OiB.png"}
+];
+
 function spawnLoot(x,y,img="https://i.imgur.com/OY8o0jA.png",type="weapon",name="Меч"){
     const div=document.createElement("div"); div.className="loot"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
     div.innerHTML=`<img src="${img}">`; div.onclick=()=>{ if(type=="weapon"||type=="shield"){ player.equipment[type]={name,img}; updateInventory(); } log(`Подобрано ${name}`); div.remove(); }; mapDiv.appendChild(div); loots.push({x,y,div});
 }
+
 function spawnShop(x,y,img="https://i.imgur.com/7c3tN2B.png"){
     const div=document.createElement("div"); div.className="shop"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px"; div.innerHTML=`<img src="${img}">`;
     div.onclick=()=>{ const choice=prompt("Купить: 1-HP 2-MP (10 монет)"); if(choice=="1" && player.coins>=10){player.coins-=10;player.hp=Math.min(player.maxHp,player.hp+50); log("💖 Куплено HP");} else if(choice=="2" && player.coins>=10){player.coins-=10;player.mp=Math.min(player.maxMp,player.mp+30); log("🔮 Куплено MP");} else log("Недостаточно монет"); updateStatus(); }; mapDiv.appendChild(div); shops.push({x,y,div});
 }
 
-// Перемещение персонажа
+// Инициализация монстров
+function initMonsters(){
+    monstersData.forEach(m=>{
+        const div=document.createElement("div");
+        div.className="monster";
+        div.style.left=m.x*tileSize+10+"px";
+        div.style.top=m.y*tileSize+10+"px";
+        div.innerHTML=`<img src="${m.img}">`;
+        mapDiv.appendChild(div);
+        m.div=div;
+        monsters.push(m);
+    });
+}
+
+// Атака и бой
+function attackMonster(monster){
+    let damage = Math.floor(Math.random() * 20 + 5 + player.skills.strength*2);
+    monster.hp -= damage;
+    showDamage(monster, damage);
+    log(`💥 Вы нанесли ${damage} урона ${monster.name}`);
+    if(monster.hp <= 0){
+        log(`💀 ${monster.name} побеждён! Получено ${monster.exp} XP и ${monster.coins} монет`);
+        player.exp += monster.exp;
+        player.coins += monster.coins;
+        dropLoot(monster.x, monster.y);
+        monster.div.remove();
+        monsters = monsters.filter(m=>m!==monster);
+        checkLevelUp();
+        updateStatus();
+    } else {
+        setTimeout(()=>monsterAttack(monster),300);
+    }
+}
+
+function monsterAttack(monster){
+    let damage = Math.floor(Math.random() * 15 + 5);
+    player.hp -= damage;
+    if(player.hp<0) player.hp=0;
+    log(`👹 ${monster.name} наносит ${damage} урона`);
+    updateStatus();
+}
+
+function showDamage(monster, dmg){
+    const dmgDiv=document.createElement("div");
+    dmgDiv.className="damage";
+    dmgDiv.innerText=dmg;
+    dmgDiv.style.left=monster.x*tileSize+20+"px";
+    dmgDiv.style.top=monster.y*tileSize-10+"px";
+    mapDiv.appendChild(dmgDiv);
+    setTimeout(()=>dmgDiv.remove(),1000);
+}
+
+function dropLoot(x,y){
+    let chance = Math.random();
+    if(chance <0.5){
+        spawnLoot(x,y,"https://i.imgur.com/OY8o0jA.png","weapon","Меч");
+    } else if(chance <0.8){
+        spawnLoot(x,y,"https://i.imgur.com/7c3tN2B.png","hp","Зелье HP");
+    }
+}
+
+// Перемещение
 function moveTo(x,y){
-    if(x<0||y<0||x>4||y>4) return; player.x=x; player.y=y;
-    characterDiv.style.left=x*tileSize+10+"px"; characterDiv.style.top=y*tileSize+10+"px";
-    monsters.forEach(m=>{ if(m.x==x && m.y==y){ log("💀 Столкнулись с монстром!"); } });
+    if(x<0||y<0||x>4||y>4) return;
+    player.x=x; player.y=y;
+    characterDiv.style.left=x*tileSize+10+"px";
+    characterDiv.style.top=y*tileSize+10+"px";
+    monsters.forEach(m=>{ if(m.x==x && m.y==y){ attackMonster(m); } });
     loots.forEach(l=>{ if(l.x==x && l.y==y){ log("✨ Рядом лут!"); } });
     shops.forEach(s=>{ if(s.x==x && s.y==y){ log("🏪 Рядом магазин!"); } });
 }
 
-document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowUp") moveTo(player.x,player.y-1);
-    if(e.key==="ArrowDown") moveTo(player.x,player.y+1);
-    if(e.key==="ArrowLeft") moveTo(player.x-1,player.y);
-    if(e.key==="ArrowRight") moveTo(player.x+1,player.y);
-});
+// Донат и VIP
+function donate(){
+    let amount = prompt("Введите сумму пополнения (руб):");
+    amount = parseInt(amount);
+    if(!amount || amount<=0) return;
+    let vipGain = Math.floor(amount/100);
+    player.vipLevel += vipGain;
+    player.coins += amount;
+    log(`💎 Донат ${amount} получено! VIP +${vipGain}, монеты +${amount}`);
+    updateStatus();
+}
 
-// Инициализация объектов после выбора класса/пола
+// Древо навыков
+function openSkillTree(){
+    document.getElementById("skillTreeModal").classList.remove("hidden");
+    updateSkillTree();
+}
+function closeSkillTree(){
+    document.getElementById("skillTreeModal").classList.add("hidden");
+}
+function updateSkillTree(){
+    const skillsDiv = document.getElementById("skillsList");
+    skillsDiv.innerHTML="";
+    document.getElementById("skillPoints").innerText = player.skillPoints;
+    for(let key in player.skills){
+        let div = document.createElement("div");
+        div.innerHTML = `${key.toUpperCase()}: ${player.skills[key]}
+            <button onclick="upgradeSkill('${key}')">+</button>`;
+        skillsDiv.appendChild(div);
+    }
+}
+function upgradeSkill(skill){
+    if(player.skillPoints<=0) return;
+    player.skills[skill] +=1;
+    player.skillPoints -=1;
+    log(`🆙 Навык ${skill.toUpperCase()} повышен до ${player.skills[skill]}`);
+    updateSkillTree();
+}
+
+// Проверка уровня
+function checkLevelUp(){
+    while(player.exp >= player.nextLevelExp){
+        player.exp -= player.nextLevelExp;
+        player.level +=1;
+        player.maxHp += 20;
+        player.hp = player.maxHp;
+        player.maxMp +=10;
+        player.mp = player.maxMp;
+        player.nextLevelExp = Math.floor(player.nextLevelExp *1.5);
+        player.skillPoints += 3;
+        log(`⭐ Поздравляем! Вы достигли уровня ${player.level}, получено 3 очка навыков`);
+        updateStatus();
+        updateSkillTree();
+    }
+}
+
+// Инициализация игры
 function initGameObjects(){
-    spawnMonster(0,0,"https://i.imgur.com/EhFz7ON.png");
-    spawnMonster(4,4,"https://i.imgur.com/2aXlQ9m.png");
-    spawnMonster(1,3,"https://i.imgur.com/XtZ0OiB.png");
+    initMonsters();
     spawnLoot(2,1,"https://i.imgur.com/OY8o0jA.png","weapon","Меч");
     spawnLoot(3,2,"https://i.imgur.com/7c3tN2B.png","hp","Зелье HP");
     spawnShop(2,0,"https://i.imgur.com/7c3tN2B.png");
-    updateInventory(); updateStatus();
+    updateInventory();
+    updateStatus();
 }
+
+// Управление клавишами
+document.addEventListener("keydown", (e)=>{
+    if(e.key=="ArrowUp") moveTo(player.x, player.y-1);
+    if(e.key=="ArrowDown") moveTo(player.x, player.y+1);
+    if(e.key=="ArrowLeft") moveTo(player.x-1, player.y);
+    if(e.key=="ArrowRight") moveTo(player.x+1, player.y);
+});
+
 </script>
 </body>
 </html>
