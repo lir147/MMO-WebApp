@@ -7,37 +7,55 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <!-- Интерфейс выбора класса и пола -->
-        <div id="selection-screen">
-            <h2>Выберите персонажа</h2>
-            <button onclick="selectClass('warrior')">Воин</button>
-            <button onclick="selectClass('mage')">Маг</button>
-            <button onclick="selectClass('archer')">Лучник</button>
-            <h3>Выберите пол</h3>
-            <button onclick="selectGender('male')">Мужской</button>
-            <button onclick="selectGender('female')">Женский</button>
+<div id="game-container">
+    <!-- Выбор класса и пола -->
+    <div id="selection-screen">
+        <h2>Выберите персонажа</h2>
+        <button onclick="selectClass('warrior')">Воин</button>
+        <button onclick="selectClass('mage')">Маг</button>
+        <button onclick="selectClass('archer')">Лучник</button>
+        <h3>Выберите пол</h3>
+        <button onclick="selectGender('male')">Мужской</button>
+        <button onclick="selectGender('female')">Женский</button>
+    </div>
+
+    <!-- Игровой экран -->
+    <div id="game-screen" style="display:none">
+        <div id="player-info">
+            <h3 id="player-name"></h3>
+            <p>Уровень: <span id="player-level">1</span> | VIP: <span id="player-vip">0</span></p>
         </div>
 
-        <!-- Игровой экран -->
-        <div id="game-screen" style="display:none">
-            <div id="player-info">
-                <h3 id="player-name"></h3>
-                <p>Уровень: <span id="player-level">1</span> | VIP: <span id="player-vip">0</span></p>
+        <div id="map-container">
+            <img id="map-img" src="https://opengameart.org/sites/default/files/map_tile.png" alt="Map">
+        </div>
+
+        <div id="character-container">
+            <img id="character-img" src="" alt="Character">
+        </div>
+
+        <button onclick="fightMonster()">Сразиться с монстром</button>
+        <button onclick="donate()">Пополнить VIP</button>
+
+        <div id="inventory-container">
+            <h3>Инвентарь</h3>
+            <div id="inventory-items"></div>
+            <h3>Экипировка</h3>
+            <div id="equipment">
+                <p>Оружие: <span id="eq-weapon">—</span></p>
+                <p>Броня: <span id="eq-armor">—</span></p>
+                <p>Аксессуар: <span id="eq-accessory">—</span></p>
             </div>
-            <div id="map-container">
-                <img id="map-img" src="https://opengameart.org/sites/default/files/map_tile.png" alt="Map">
-            </div>
-            <div id="character-container">
-                <img id="character-img" src="" alt="Character">
-            </div>
-            <div id="inventory-container">
-                <h3>Инвентарь</h3>
-                <div id="inventory-items"></div>
-            </div>
-            <button onclick="donate()">Пополнить VIP</button>
+        </div>
+
+        <div id="skills-container">
+            <h3>Дерево навыков (очки: <span id="skill-points">0</span>)</h3>
+            <button onclick="upgradeSkill('strength')">Сила (+1)</button>
+            <button onclick="upgradeSkill('agility')">Ловкость (+1)</button>
+            <button onclick="upgradeSkill('intelligence')">Интеллект (+1)</button>
         </div>
     </div>
-    <script src="app.js"></script>
+</div>
+<script src="app.js"></script>
 </body>
 </html>
