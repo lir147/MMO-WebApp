@@ -5,8 +5,8 @@
 <title>Telegram Mini-MMORPG</title>
 <style>
 body { font-family: Arial; background:#111; color:#fff; text-align:center; }
-#game { margin:20px auto; width:400px; height:400px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; }
-.tile { width:80px; height:80px; float:left; border:1px solid #444; background-size:cover; position:relative; }
+#game { margin:20px auto; width:400px; height:400px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; background-image: url('https://i.imgur.com/4vXK9pS.png'); background-size: cover; }
+.tile { width:80px; height:80px; float:left; border:1px solid #444; position:relative; }
 .character, .monster, .loot, .shop { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
 .character img, .monster img, .loot img, .shop img { width:100%; height:100%; }
 #status { margin-top:10px; border:1px solid #fff; padding:5px; text-align:left; }
@@ -76,19 +76,6 @@ let player = {
 // Карта
 const mapDiv=document.getElementById("game");
 const tileSize=80;
-let mapTiles=[];
-for(let y=0;y<5;y++){
-    mapTiles[y]=[];
-    for(let x=0;x<5;x++){
-        const tile=document.createElement("div");
-        tile.className="tile";
-        tile.style.backgroundImage="url('https://i.imgur.com/Nl1lG2p.png')";
-        tile.style.left=x*tileSize+"px";
-        tile.style.top=y*tileSize+"px";
-        mapDiv.appendChild(tile);
-        mapTiles[y][x]=tile;
-    }
-}
 
 // Персонаж
 const characterDiv=document.createElement("div");
@@ -145,7 +132,7 @@ function checkSelectionComplete(){
 
 // Обновление картинки персонажа
 function updateCharacterImage(){
-    let img='https://i.imgur.com/4c6wqdn.png';
+    let img='https://i.imgur.com/4c6wqdn.png'; // Warrior male
     if(player.class=='Mage') img='https://i.imgur.com/5Uq2KHu.png';
     if(player.class=='Archer') img='https://i.imgur.com/1vTtOkM.png';
     if(player.gender=='female'){
@@ -164,162 +151,123 @@ let monstersData = [
     {x:1, y:3, name:"Скелет", hp:40, maxHp:40, exp:15, coins:5, img:"https://i.imgur.com/XtZ0OiB.png"}
 ];
 
-function spawnLoot(x,y,img="https://i.imgur.com/OY8o0jA.png",type="weapon",name="Меч"){
-    const div=document.createElement("div"); div.className="loot"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
-    div.innerHTML=`<img src="${img}">`; div.onclick=()=>{ if(type=="weapon"||type=="shield"){ player.equipment[type]={name,img}; updateInventory(); } log(`Подобрано ${name}`); div.remove(); }; mapDiv.appendChild(div); loots.push({x,y,div});
+// Лут
+function spawnLoot(x,y,img,name,type="weapon"){
+    const div=document.createElement("div"); div.className="loot";
+    div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
+    div.innerHTML=`<img src="${img}">`;
+    div.onclick=()=>{ player.equipment[type]={name,img}; updateInventory(); log(`Подобрано ${name}`); div.remove(); };
+    mapDiv.appendChild(div); loots.push({x,y,div});
 }
 
+// Магазин
 function spawnShop(x,y,img="https://i.imgur.com/7c3tN2B.png"){
-    const div=document.createElement("div"); div.className="shop"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px"; div.innerHTML=`<img src="${img}">`;
-    div.onclick=()=>{ const choice=prompt("Купить: 1-HP 2-MP (10 монет)"); if(choice=="1" && player.coins>=10){player.coins-=10;player.hp=Math.min(player.maxHp,player.hp+50); log("💖 Куплено HP");} else if(choice=="2" && player.coins>=10){player.coins-=10;player.mp=Math.min(player.maxMp,player.mp+30); log("🔮 Куплено MP");} else log("Недостаточно монет"); updateStatus(); }; mapDiv.appendChild(div); shops.push({x,y,div});
+    const div=document.createElement("div"); div.className="shop"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
+    div.innerHTML=`<img src="${img}">`;
+    div.onclick=()=>{
+        const choice=prompt("Купить: 1-HP 2-MP (10 монет)");
+        if(choice=="1" && player.coins>=10){player.coins-=10;player.hp=Math.min(player.maxHp,player.hp+50); log("💖 Куплено HP");}
+        else if(choice=="2" && player.coins>=10){player.coins-=10;player.mp=Math.min(player.maxMp,player.mp+30); log("🔮 Куплено MP");}
+        else log("Недостаточно монет"); updateStatus();
+    };
+    mapDiv.appendChild(div); shops.push({x,y,div});
 }
 
 // Инициализация монстров
 function initMonsters(){
     monstersData.forEach(m=>{
-        const div=document.createElement("div");
-        div.className="monster";
-        div.style.left=m.x*tileSize+10+"px";
-        div.style.top=m.y*tileSize+10+"px";
+        const div=document.createElement("div"); div.className="monster";
+        div.style.left=m.x*tileSize+10+"px"; div.style.top=m.y*tileSize+10+"px";
         div.innerHTML=`<img src="${m.img}">`;
         mapDiv.appendChild(div);
-        m.div=div;
-        monsters.push(m);
+        m.div=div; monsters.push(m);
     });
-}
-
-// Атака и бой
-function attackMonster(monster){
-    let damage = Math.floor(Math.random() * 20 + 5 + player.skills.strength*2);
-    monster.hp -= damage;
-    showDamage(monster, damage);
-    log(`💥 Вы нанесли ${damage} урона ${monster.name}`);
-    if(monster.hp <= 0){
-        log(`💀 ${monster.name} побеждён! Получено ${monster.exp} XP и ${monster.coins} монет`);
-        player.exp += monster.exp;
-        player.coins += monster.coins;
-        dropLoot(monster.x, monster.y);
-        monster.div.remove();
-        monsters = monsters.filter(m=>m!==monster);
-        checkLevelUp();
-        updateStatus();
-    } else {
-        setTimeout(()=>monsterAttack(monster),300);
-    }
-}
-
-function monsterAttack(monster){
-    let damage = Math.floor(Math.random() * 15 + 5);
-    player.hp -= damage;
-    if(player.hp<0) player.hp=0;
-    log(`👹 ${monster.name} наносит ${damage} урона`);
-    updateStatus();
-}
-
-function showDamage(monster, dmg){
-    const dmgDiv=document.createElement("div");
-    dmgDiv.className="damage";
-    dmgDiv.innerText=dmg;
-    dmgDiv.style.left=monster.x*tileSize+20+"px";
-    dmgDiv.style.top=monster.y*tileSize-10+"px";
-    mapDiv.appendChild(dmgDiv);
-    setTimeout(()=>dmgDiv.remove(),1000);
-}
-
-function dropLoot(x,y){
-    let chance = Math.random();
-    if(chance <0.5){
-        spawnLoot(x,y,"https://i.imgur.com/OY8o0jA.png","weapon","Меч");
-    } else if(chance <0.8){
-        spawnLoot(x,y,"https://i.imgur.com/7c3tN2B.png","hp","Зелье HP");
-    }
-}
-
-// Перемещение
-function moveTo(x,y){
-    if(x<0||y<0||x>4||y>4) return;
-    player.x=x; player.y=y;
-    characterDiv.style.left=x*tileSize+10+"px";
-    characterDiv.style.top=y*tileSize+10+"px";
-    monsters.forEach(m=>{ if(m.x==x && m.y==y){ attackMonster(m); } });
-    loots.forEach(l=>{ if(l.x==x && l.y==y){ log("✨ Рядом лут!"); } });
-    shops.forEach(s=>{ if(s.x==x && s.y==y){ log("🏪 Рядом магазин!"); } });
-}
-
-// Донат и VIP
-function donate(){
-    let amount = prompt("Введите сумму пополнения (руб):");
-    amount = parseInt(amount);
-    if(!amount || amount<=0) return;
-    let vipGain = Math.floor(amount/100);
-    player.vipLevel += vipGain;
-    player.coins += amount;
-    log(`💎 Донат ${amount} получено! VIP +${vipGain}, монеты +${amount}`);
-    updateStatus();
-}
-
-// Древо навыков
-function openSkillTree(){
-    document.getElementById("skillTreeModal").classList.remove("hidden");
-    updateSkillTree();
-}
-function closeSkillTree(){
-    document.getElementById("skillTreeModal").classList.add("hidden");
-}
-function updateSkillTree(){
-    const skillsDiv = document.getElementById("skillsList");
-    skillsDiv.innerHTML="";
-    document.getElementById("skillPoints").innerText = player.skillPoints;
-    for(let key in player.skills){
-        let div = document.createElement("div");
-        div.innerHTML = `${key.toUpperCase()}: ${player.skills[key]}
-            <button onclick="upgradeSkill('${key}')">+</button>`;
-        skillsDiv.appendChild(div);
-    }
-}
-function upgradeSkill(skill){
-    if(player.skillPoints<=0) return;
-    player.skills[skill] +=1;
-    player.skillPoints -=1;
-    log(`🆙 Навык ${skill.toUpperCase()} повышен до ${player.skills[skill]}`);
-    updateSkillTree();
-}
-
-// Проверка уровня
-function checkLevelUp(){
-    while(player.exp >= player.nextLevelExp){
-        player.exp -= player.nextLevelExp;
-        player.level +=1;
-        player.maxHp += 20;
-        player.hp = player.maxHp;
-        player.maxMp +=10;
-        player.mp = player.maxMp;
-        player.nextLevelExp = Math.floor(player.nextLevelExp *1.5);
-        player.skillPoints += 3;
-        log(`⭐ Поздравляем! Вы достигли уровня ${player.level}, получено 3 очка навыков`);
-        updateStatus();
-        updateSkillTree();
-    }
 }
 
 // Инициализация игры
 function initGameObjects(){
     initMonsters();
-    spawnLoot(2,1,"https://i.imgur.com/OY8o0jA.png","weapon","Меч");
-    spawnLoot(3,2,"https://i.imgur.com/7c3tN2B.png","hp","Зелье HP");
+    spawnLoot(2,1,"https://i.imgur.com/OY8o0jA.png","Меч");
+    spawnLoot(3,2,"https://i.imgur.com/7c3tN2B.png","Зелье HP");
     spawnShop(2,0,"https://i.imgur.com/7c3tN2B.png");
-    updateInventory();
-    updateStatus();
+    updateInventory(); updateStatus();
 }
 
 // Управление клавишами
-document.addEventListener("keydown", (e)=>{
+document.addEventListener("keydown",(e)=>{
     if(e.key=="ArrowUp") moveTo(player.x, player.y-1);
     if(e.key=="ArrowDown") moveTo(player.x, player.y+1);
     if(e.key=="ArrowLeft") moveTo(player.x-1, player.y);
     if(e.key=="ArrowRight") moveTo(player.x+1, player.y);
 });
 
+// Перемещение и атака
+function moveTo(x,y){
+    if(x<0||y<0||x>4||y>4) return;
+    player.x=x; player.y=y;
+    characterDiv.style.left=x*tileSize+10+"px";
+    characterDiv.style.top=y*tileSize+10+"px";
+    monsters.forEach(m=>{ if(m.x==x && m.y==y) attackMonster(m); });
+    loots.forEach(l=>{ if(l.x==x && l.y==y) log("✨ Рядом лут!"); });
+    shops.forEach(s=>{ if(s.x==x && s.y==y) log("🏪 Рядом магазин!"); });
+}
+
+// Бой
+function attackMonster(monster){
+    let damage = Math.floor(Math.random()*20+5 + player.skills.strength*2);
+    monster.hp -= damage; log(`💥 Урон ${monster.name}: ${damage}`);
+    if(monster.hp<=0){
+        log(`💀 ${monster.name} повержен! +${monster.exp} XP, +${monster.coins} монет`);
+        player.exp+=monster.exp; player.coins+=monster.coins;
+        dropLoot(monster.x,monster.y); monster.div.remove();
+        monsters=monsters.filter(m=>m!==monster); checkLevelUp(); updateStatus();
+    } else setTimeout(()=>monsterAttack(monster),300);
+}
+function monsterAttack(monster){
+    let damage = Math.floor(Math.random()*15+5);
+    player.hp -= damage; if(player.hp<0) player.hp=0;
+    log(`👹 ${monster.name} атакует ${damage}`);
+    updateStatus();
+}
+function dropLoot(x,y){ spawnLoot(x,y,"https://i.imgur.com/OY8o0jA.png","Меч"); }
+
+// Донат
+function donate(){
+    let amount = prompt("Введите сумму пополнения (руб):"); amount=parseInt(amount);
+    if(!amount || amount<=0) return;
+    let vipGain = Math.floor(amount/100);
+    player.vipLevel += vipGain; player.coins+=amount;
+    log(`💎 Донат ${amount}! VIP +${vipGain}, монеты +${amount}`);
+    updateStatus();
+}
+
+// Древо навыков
+function openSkillTree(){ document.getElementById("skillTreeModal").classList.remove("hidden"); updateSkillTree(); }
+function closeSkillTree(){ document.getElementById("skillTreeModal").classList.add("hidden"); }
+function updateSkillTree(){
+    const skillsDiv = document.getElementById("skillsList"); skillsDiv.innerHTML="";
+    document.getElementById("skillPoints").innerText = player.skillPoints;
+    for(let key in player.skills){
+        let div = document.createElement("div");
+        div.innerHTML = `${key.toUpperCase()}: ${player.skills[key]} <button onclick="upgradeSkill('${key}')">+</button>`;
+        skillsDiv.appendChild(div);
+    }
+}
+function upgradeSkill(skill){ if(player.skillPoints<=0) return; player.skills[skill]+=1; player.skillPoints-=1; log(`🆙 ${skill.toUpperCase()} +1`); updateSkillTree(); }
+
+// Уровень
+function checkLevelUp(){
+    while(player.exp>=player.nextLevelExp){
+        player.exp-=player.nextLevelExp;
+        player.level+=1; player.maxHp+=20; player.hp=player.maxHp;
+        player.maxMp+=10; player.mp=player.maxMp;
+        player.nextLevelExp=Math.floor(player.nextLevelExp*1.5);
+        player.skillPoints+=3;
+        log(`⭐ Уровень ${player.level}! 3 очка навыков`);
+        updateStatus(); updateSkillTree();
+    }
+}
 </script>
+
 </body>
 </html>
