@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MMO RPG</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; text-align: center; }
+        #game { margin: 20px auto; width: 600px; padding: 20px; border: 2px solid #fff; border-radius: 10px; background: #333; }
+        button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #log { text-align: left; margin-top: 20px; height: 200px; overflow-y: auto; border: 1px solid #fff; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h2>Добро пожаловать в RPG!</h2>
+        <div id="character">Выберите класс:</div>
+        <button onclick="selectClass('Warrior')">⚔️ Воин</button>
+        <button onclick="selectClass('Mage')">🪄 Маг</button>
+        <button onclick="selectClass('Archer')">🏹 Лучник</button>
+
+        <div id="menu" style="display:none;">
+            <h3 id="status"></h3>
+            <button onclick="showMap()">🗺️ Показать карту</button>
+            <button onclick="getLoot()">⚔️ Получить лут</button>
+            <button onclick="showInventory()">📦 Инвентарь</button>
+            <button onclick="showCharacter()">🔄 Персонаж</button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let player = { name: "Игрок", class: "", hp: 0, mp: 0, inventory: [] };
+
+        function log(msg) {
+            const logDiv = document.getElementById("log");
+            logDiv.innerHTML += msg + "<br>";
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function selectClass(cls) {
+            player.class = cls;
+            if (cls === "Warrior") { player.hp=120; player.mp=30; }
+            if (cls === "Mage") { player.hp=60; player.mp=100; }
+            if (cls === "Archer") { player.hp=80; player.mp=50; }
+
+            document.getElementById("character").style.display="none";
+            document.getElementById("menu").style.display="block";
+            document.getElementById("status").innerText = `${player.class} - HP:${player.hp} MP:${player.mp}`;
+            log(`Вы выбрали класс ${cls}`);
+        }
+
+        function showMap() {
+            log("🌍 Вы открыли карту! [сюда можно вставить изображение карты]");
+        }
+
+        function getLoot() {
+            const items = ["Меч", "Посох", "Лук", "Щит", "Зелье"];
+            const item = items[Math.floor(Math.random()*items.length)];
+            player.inventory.push(item);
+            log(`🎉 Вы получили: ${item}`);
+        }
+
+        function showInventory() {
+            if(player.inventory.length===0) { log("📭 Инвентарь пуст"); return; }
+            log("📦 Инвентарь: " + player.inventory.join(", "));
+        }
+
+        function showCharacter() {
+            log(`🧑‍💻 Персонаж: ${player.name} | Класс: ${player.class} | HP:${player.hp} MP:${player.mp}`);
+        }
+    </script>
+</body>
+</html>
