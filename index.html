@@ -2,132 +2,83 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Mini-MMORPG с прогрессом и VIP</title>
+<title>Mini-MMORPG с картой</title>
 <style>
 body { font-family: Arial; background:#111; color:#fff; text-align:center; }
 #game { margin:20px auto; width:400px; height:400px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; }
 .tile { width:80px; height:80px; float:left; border:1px solid #444; background-size:cover; position:relative; }
-.character, .monster, .loot, .effect, .shop { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
-.character img, .monster img, .loot img, .effect img, .shop img { width:100%; height:100%; }
+.character, .monster, .loot, .shop { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
+.character img, .monster img, .loot img, .shop img { width:100%; height:100%; }
 .damage { position:absolute; font-weight:bold; color:red; animation:up 1s forwards; }
 @keyframes up { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-40px); } }
-.effectAnim { animation:effectAnim 0.5s forwards; }
-@keyframes effectAnim { 0% {opacity:1; transform:scale(0.5);} 100% {opacity:0; transform:scale(1.5);} }
-#log { clear:both; text-align:left; height:120px; overflow-y:auto; margin-top:10px; border:1px solid #fff; padding:5px; }
 #status { margin-top:10px; border:1px solid #fff; padding:5px; text-align:left; }
 .bar { width:100%; height:15px; background:#444; border-radius:5px; margin:2px 0; position:relative; }
 .bar-fill { height:100%; background:#0f0; width:0%; border-radius:5px; }
+#inventory { margin-top:10px; }
 .item { width:50px; height:50px; margin:5px; display:inline-block; background-size:cover; border:1px solid #fff; border-radius:5px; cursor:pointer; }
-button { margin:5px; padding:8px 12px; }
-#skills { margin-top:10px; }
-.skill { display:inline-block; width:80px; height:80px; border:1px solid #fff; margin:3px; line-height:80px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h2>Mini-MMORPG 5x5 с прогрессом и VIP</h2>
-<div>
-    Класс:
-    <button onclick="selectClass('Warrior')">Воин</button>
-    <button onclick="selectClass('Mage')">Маг</button>
-    <button onclick="selectClass('Archer')">Лучник</button>
-</div>
-<div>
-    Пол:
-    <button onclick="selectGender('male')">Мужской</button>
-    <button onclick="selectGender('female')">Женский</button>
-</div>
-
+<h2>Mini-MMORPG с визуальной картой</h2>
 <div id="game"></div>
 
-<div>
-    <button onclick="buyVIP()">💎 VIP</button>
-    <button onclick="donate()">💰 Пополнить счет</button>
-</div>
-
 <div id="status">
-    <div>HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div></div>
-    <div>MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div></div>
-    <div>EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div></div>
-    <div>Level: <span id="levelDisplay">1</span></div>
-    <div>VIP уровень: <span id="vipDisplay">0</span></div>
-    <div>Монеты: <span id="coinsDisplay">0</span></div>
+    HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div>
+    MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div>
+    EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div>
+    Level: <span id="levelDisplay">1</span>
+    VIP уровень: <span id="vipDisplay">0</span>
+    Монеты: <span id="coinsDisplay">0</span>
 </div>
 
 <div id="inventory"></div>
-<div id="skills"></div>
-<div id="log"></div>
+
+<div id="log" style="height:120px; overflow-y:auto; border:1px solid #fff; padding:5px;"></div>
 
 <script>
 // Игрок
-let player = {
-    x:2,y:2,hp:100,maxHp:100,mp:50,maxMp:50,
-    strength:10,agility:10,intelligence:10,
-    inventory:[],level:1,exp:0,nextLevelExp:100,coins:0,
-    vip:false,vipLevel:0,skillPoints:0,
-    class:'',gender:'',equipment:{weapon:null,shield:null,armor:null}
-};
+let player = {x:2,y:2,hp:100,maxHp:100,mp:50,maxMp:50,exp:0,nextLevelExp:100,level:1,coins:0,vipLevel:0,inventory:[],equipment:{weapon:null,shield:null,armor:null}};
 
-let monsters = [];
-let lootTable = [
-    {name:"Меч", img:"https://i.imgur.com/OY8o0jA.png",type:"weapon"},
-    {name:"Щит", img:"https://i.imgur.com/Ny3uXgD.png",type:"shield"},
-    {name:"Зелье HP", img:"https://i.imgur.com/7c3tN2B.png",type:"hp"},
-    {name:"Зелье MP", img:"https://i.imgur.com/3Q6RtEv.png",type:"mp"}
-];
-
-// Карта
-const mapDiv = document.getElementById("game");
-const tileSize = 80;
-let mapTiles = [];
+// Тайлы карты
+const mapDiv=document.getElementById("game");
+const tileSize=80;
+let mapTiles=[];
 for(let y=0;y<5;y++){
     mapTiles[y]=[];
     for(let x=0;x<5;x++){
-        const tile = document.createElement("div");
+        const tile=document.createElement("div");
         tile.className="tile";
-        tile.style.backgroundImage=`url('https://i.imgur.com/lfkz2Tq.png')`;
-        tile.style.left = x*tileSize+"px";
-        tile.style.top = y*tileSize+"px";
+        tile.style.backgroundImage="url('https://i.imgur.com/lfkz2Tq.png')";
+        tile.style.left=x*tileSize+"px";
+        tile.style.top=y*tileSize+"px";
         mapDiv.appendChild(tile);
         mapTiles[y][x]=tile;
     }
 }
 
 // Персонаж
-const characterDiv = document.createElement("div");
+const characterDiv=document.createElement("div");
 characterDiv.className="character";
 characterDiv.style.left=player.x*tileSize+10+"px";
 characterDiv.style.top=player.y*tileSize+10+"px";
+characterDiv.innerHTML='<img src="https://i.imgur.com/4c6wqdn.png">';
 mapDiv.appendChild(characterDiv);
 
-function selectClass(cls){ player.class=cls; log(`Вы выбрали класс: ${cls}`); updateCharacterImage(); }
-function selectGender(g){ player.gender=g; log(`Вы выбрали пол: ${g}`); updateCharacterImage(); }
-function updateCharacterImage(){
-    let img='https://i.imgur.com/4c6wqdn.png';
-    if(player.class=='Mage') img='https://i.imgur.com/5Uq2KHu.png';
-    if(player.class=='Archer') img='https://i.imgur.com/1vTtOkM.png';
-    if(player.gender=='female'){
-        if(player.class=='Warrior') img='https://i.imgur.com/3tY7aLp.png';
-        if(player.class=='Mage') img='https://i.imgur.com/ZtFJqP1.png';
-        if(player.class=='Archer') img='https://i.imgur.com/vl4oZT6.png';
-    }
-    characterDiv.innerHTML=`<img src="${img}">`;
-}
-
-// Лог
+// Логи
 function log(msg){ const logDiv=document.getElementById("log"); logDiv.innerHTML+=msg+"<br>"; logDiv.scrollTop=logDiv.scrollHeight; }
 
-// Обновление статусов
+// Статусы
 function updateStatus(){
-    document.getElementById("hpFill").style.width = (player.hp/player.maxHp*100)+"%";
-    document.getElementById("mpFill").style.width = (player.mp/player.maxMp*100)+"%";
-    document.getElementById("expFill").style.width = (player.exp/player.nextLevelExp*100)+"%";
-    document.getElementById("levelDisplay").innerText = player.level;
-    document.getElementById("vipDisplay").innerText = player.vipLevel;
-    document.getElementById("coinsDisplay").innerText = player.coins;
+    document.getElementById("hpFill").style.width=(player.hp/player.maxHp*100)+"%";
+    document.getElementById("mpFill").style.width=(player.mp/player.maxMp*100)+"%";
+    document.getElementById("expFill").style.width=(player.exp/player.nextLevelExp*100)+"%";
+    document.getElementById("levelDisplay").innerText=player.level;
+    document.getElementById("vipDisplay").innerText=player.vipLevel;
+    document.getElementById("coinsDisplay").innerText=player.coins;
 }
 
-// Инвентарь с иконками
+// Инвентарь
 function updateInventory(){
     const invDiv=document.getElementById("inventory");
     invDiv.innerHTML="";
@@ -142,81 +93,74 @@ function updateInventory(){
     }
 }
 
-// Навыки
-function addSkill(name){
-    if(player.skillPoints<=0){ log("Нет очков навыков"); return; }
-    if(name=="strength") player.strength+=1;
-    if(name=="agility") player.agility+=1;
-    if(name=="intelligence") player.intelligence+=1;
-    player.skillPoints--;
-    log(`Навык ${name} увеличен. Осталось очков: ${player.skillPoints}`);
-    renderSkills();
+// Спавн объектов
+let monsters=[],loots=[],shops=[];
+function spawnMonster(x,y,img="https://i.imgur.com/EhFz7ON.png"){
+    const div=document.createElement("div");
+    div.className="monster";
+    div.style.left=x*tileSize+10+"px";
+    div.style.top=y*tileSize+10+"px";
+    div.innerHTML=`<img src="${img}">`;
+    mapDiv.appendChild(div);
+    monsters.push({x,y,div});
+    log(`Монстр на (${x},${y})`);
 }
-function renderSkills(){
-    const skDiv=document.getElementById("skills");
-    skDiv.innerHTML="";
-    ["strength","agility","intelligence"].forEach(s=>{
-        const b=document.createElement("div");
-        b.className="skill";
-        b.innerText=s+"\n"+player[s];
-        b.onclick=()=>addSkill(s);
-        skDiv.appendChild(b);
-    });
+function spawnLoot(x,y,img="https://i.imgur.com/OY8o0jA.png",type="weapon",name="Меч"){
+    const div=document.createElement("div");
+    div.className="loot";
+    div.style.left=x*tileSize+10+"px";
+    div.style.top=y*tileSize+10+"px";
+    div.innerHTML=`<img src="${img}">`;
+    div.onclick=()=>{
+        if(type=="weapon"||type=="shield"){ player.equipment[type]={name,img}; updateInventory(); }
+        log(`Подобрано ${name}`);
+        div.remove();
+    };
+    mapDiv.appendChild(div);
+    loots.push({x,y,div});
 }
-renderSkills();
-
-// Уровень
-function levelUp(){
-    player.level++;
-    player.exp=player.exp-player.nextLevelExp;
-    player.nextLevelExp+=50;
-    player.skillPoints+=5;
-    log(`🔝 Уровень повышен! Очки навыков: ${player.skillPoints}`);
-    renderSkills();
-    updateStatus();
-}
-
-// VIP и донат
-let firstDonation=true;
-function buyVIP(){
-    if(player.vip){ log("Вы уже VIP!"); return; }
-    if(player.coins>=50){
-        player.coins-=50;
-        player.vip=true;
-        player.vipLevel++;
-        log(`💎 Вы стали VIP! Уровень VIP: ${player.vipLevel}`);
+function spawnShop(x,y,img="https://i.imgur.com/7c3tN2B.png"){
+    const div=document.createElement("div");
+    div.className="shop";
+    div.style.left=x*tileSize+10+"px";
+    div.style.top=y*tileSize+10+"px";
+    div.innerHTML=`<img src="${img}">`;
+    div.onclick=()=>{
+        const choice=prompt("Купить: 1-HP 2-MP (Цена: 10 монет)");
+        if(choice=="1" && player.coins>=10){ player.coins-=10; player.hp=Math.min(player.maxHp,player.hp+50); log("💖 Куплено HP"); }
+        else if(choice=="2" && player.coins>=10){ player.coins-=10; player.mp=Math.min(player.maxMp,player.mp+30); log("🔮 Куплено MP"); }
+        else log("Недостаточно монет");
         updateStatus();
-    } else log("💰 Недостаточно монет для VIP (50)");
-}
-function donate(){
-    const amount = prompt("Введите сумму для пополнения:");
-    if(amount>0){
-        player.coins+=parseInt(amount);
-        player.vipLevel++;
-        log(`💰 Пополнение на ${amount} монет. VIP уровень: ${player.vipLevel}`);
-        updateStatus();
-        if(firstDonation){
-            firstDonation=false;
-            const bonus = {name:"Эпический меч", img:"https://i.imgur.com/OY8o0jA.png", type:"weapon"};
-            player.equipment.weapon = bonus;
-            log("🎁 Бонус за первое пополнение: Эпический меч!");
-            updateInventory();
-        }
-    }
+    };
+    mapDiv.appendChild(div);
+    shops.push({x,y,div});
 }
 
-// Контрол через стрелки
+// Перемещение персонажа
+function moveTo(x,y){
+    if(x<0||y<0||x>4||y>4) return;
+    player.x=x; player.y=y;
+    characterDiv.style.left=x*tileSize+10+"px";
+    characterDiv.style.top=y*tileSize+10+"px";
+    // Проверка на объекты
+    monsters.forEach(m=>{ if(m.x==x && m.y==y){ log("💀 Столкнулись с монстром!"); } });
+    loots.forEach(l=>{ if(l.x==x && l.y==y){ log("✨ Рядом лут!"); } });
+    shops.forEach(s=>{ if(s.x==x && s.y==y){ log("🏪 Рядом магазин!"); } });
+}
+
 document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowUp" && player.y>0) moveTo(player.x,player.y-1);
-    if(e.key==="ArrowDown" && player.y<4) moveTo(player.x,player.y+1);
-    if(e.key==="ArrowLeft" && player.x>0) moveTo(player.x-1,player.y);
-    if(e.key==="ArrowRight" && player.x<4) moveTo(player.x+1,player.y);
+    if(e.key==="ArrowUp") moveTo(player.x,player.y-1);
+    if(e.key==="ArrowDown") moveTo(player.x,player.y+1);
+    if(e.key==="ArrowLeft") moveTo(player.x-1,player.y);
+    if(e.key==="ArrowRight") moveTo(player.x+1,player.y);
 });
 
-// Инициализация (монстры и магазин)
+// Спавн объектов
 spawnMonster(0,0);
 spawnMonster(4,4);
 spawnMonster(1,3);
+spawnLoot(2,1);
+spawnLoot(3,2,"https://i.imgur.com/7c3tN2B.png","hp","Зелье HP");
 spawnShop(2,0);
 
 updateInventory();
