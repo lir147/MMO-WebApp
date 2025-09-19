@@ -2,92 +2,73 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Telegram Mini-MMORPG</title>
+<title>Mini-RPG Mobile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { font-family: Arial; background:#111; color:#fff; text-align:center; }
-#game { margin:20px auto; width:400px; height:400px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; background-image: url('https://i.imgur.com/4vXK9pS.png'); background-size: cover; }
-.tile { width:80px; height:80px; float:left; border:1px solid #444; position:relative; }
-.character, .monster, .loot, .shop { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
-.character img, .monster img, .loot img, .shop img { width:100%; height:100%; }
-#status { margin-top:10px; border:1px solid #fff; padding:5px; text-align:left; }
-.bar { width:100%; height:15px; background:#444; border-radius:5px; margin:2px 0; position:relative; }
+body { font-family: Arial; background:#111; color:#fff; text-align:center; margin:0; padding:0; }
+#game { margin:10px auto; width:95vw; height:50vh; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; background-image: url('https://i.imgur.com/4vXK9pS.png'); background-size: cover; }
+.character, .monster, .loot { width:50px; height:50px; position:absolute; transition:all 0.2s ease; }
+.character img, .monster img, .loot img { width:100%; height:100%; }
+#status { margin:5px; border:1px solid #fff; padding:5px; font-size:14px; text-align:left; }
+.bar { width:100%; height:10px; background:#444; border-radius:5px; margin:2px 0; position:relative; }
 .bar-fill { height:100%; background:#0f0; width:0%; border-radius:5px; }
-#inventory { margin-top:10px; }
-.item { width:50px; height:50px; margin:5px; display:inline-block; background-size:cover; border:1px solid #fff; border-radius:5px; cursor:pointer; }
-#log { height:120px; overflow-y:auto; border:1px solid #fff; padding:5px; text-align:left; }
-button { margin:5px; padding:8px 12px; }
+#inventory { margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; }
+.item { width:40px; height:40px; margin:3px; background-size:cover; border:1px solid #fff; border-radius:5px; cursor:pointer; position:relative; }
+.item span { position:absolute; bottom:0; left:0; right:0; background:#0008; font-size:9px; }
+#log { height:80px; overflow-y:auto; border:1px solid #fff; padding:3px; text-align:left; font-size:12px; }
+button { margin:3px; padding:6px 8px; font-size:14px; border-radius:5px; }
 .hidden { display:none; }
-#gameControls { margin-top:10px; }
+#gameControls { margin-top:5px; }
 #skillTreeModal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background:#222; border:2px solid #fff; padding:20px; z-index:100; width:300px; max-height:400px; overflow:auto; }
+    background:#222; border:2px solid #fff; padding:15px; z-index:100; width:90%; max-width:300px; max-height:60%; overflow:auto; font-size:14px; }
 </style>
 </head>
 <body>
 
-<h2>Telegram Mini-MMORPG</h2>
+<h2>Mini-RPG Mobile</h2>
 
-<!-- Выбор класса и пола -->
-<div id="classGenderSelection">
-    <div>Класс:
-        <button onclick="selectClass('Warrior')">Воин</button>
-        <button onclick="selectClass('Mage')">Маг</button>
-        <button onclick="selectClass('Archer')">Лучник</button>
-    </div>
-    <div>Пол:
-        <button onclick="selectGender('male')">Мужской</button>
-        <button onclick="selectGender('female')">Женский</button>
-    </div>
+<div id="game"></div>
+
+<div id="status">
+HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div>
+MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div>
+EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div>
+Level: <span id="levelDisplay">1</span> | VIP: <span id="vipDisplay">0</span> | Coins: <span id="coinsDisplay">0</span>
 </div>
 
-<div id="game" class="hidden"></div>
+<div id="inventory" title="Инвентарь"></div>
+<div id="log"></div>
 
-<div id="status" class="hidden">
-    HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div>
-    MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div>
-    EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div>
-    Level: <span id="levelDisplay">1</span>
-    VIP уровень: <span id="vipDisplay">0</span>
-    Монеты: <span id="coinsDisplay">0</span>
-</div>
-
-<div id="inventory" class="hidden"></div>
-<div id="log" class="hidden"></div>
-
-<div id="gameControls" class="hidden">
-    <button onclick="donate()">💎 Пополнить счёт (+VIP)</button>
-    <button onclick="openSkillTree()">🧙 Открыть древо навыков</button>
+<div id="gameControls">
+<button onclick="donate()">💎 Донат / Пополнить</button>
+<button onclick="openSkillTree()">🧙 Древо навыков</button>
 </div>
 
 <div id="skillTreeModal" class="hidden">
-    <h3>Древо навыков</h3>
-    <div id="skillsList"></div>
-    <div>Очки навыков: <span id="skillPoints">0</span></div>
-    <button onclick="closeSkillTree()">Закрыть</button>
+<h3>Древо навыков</h3>
+<div id="skillsList"></div>
+<div>Очки навыков: <span id="skillPoints">0</span></div>
+<button onclick="closeSkillTree()">Закрыть</button>
 </div>
 
 <script>
 // Игрок
 let player = {
-    x:2,y:2,hp:100,maxHp:100,mp:50,maxMp:50,exp:0,nextLevelExp:100,
-    level:1,coins:0,vipLevel:0,inventory:[],equipment:{weapon:null,shield:null,armor:null},
-    class:'',gender:'',skillPoints:0, skills:{strength:0,agility:0,intelligence:0}
+    x:160, y:160, hp:100, maxHp:100, mp:50, maxMp:50,
+    exp:0, nextLevelExp:100, level:1, coins:0, vipLevel:0, firstTopup:true,
+    inventory:[], equipment:{weapon:null, armor:null, shield:null},
+    skillPoints:0, skills:{strength:0, agility:0, intelligence:0}
 };
 
-// Карта
-const mapDiv=document.getElementById("game");
-const tileSize=80;
-
 // Персонаж
-const characterDiv=document.createElement("div");
-characterDiv.className="character";
-characterDiv.style.left=player.x*tileSize+10+"px";
-characterDiv.style.top=player.y*tileSize+10+"px";
-mapDiv.appendChild(characterDiv);
+const mapDiv = document.getElementById("game");
+const charDiv=document.createElement("div"); charDiv.className="character"; mapDiv.appendChild(charDiv);
+const charBase=document.createElement("img"); charBase.src="https://i.imgur.com/4c6wqdn.png"; charDiv.appendChild(charBase);
+const charWeapon=document.createElement("img"); charDiv.appendChild(charWeapon);
+const charArmor=document.createElement("img"); charDiv.appendChild(charArmor);
+const charShield=document.createElement("img"); charDiv.appendChild(charShield);
 
-// Лог
-function log(msg){ const logDiv=document.getElementById("log"); logDiv.innerHTML+=msg+"<br>"; logDiv.scrollTop=logDiv.scrollHeight; }
-
-// Статусы
+function log(msg){ const l=document.getElementById("log"); l.innerHTML+=msg+"<br>"; l.scrollTop=l.scrollHeight; }
 function updateStatus(){
     document.getElementById("hpFill").style.width=(player.hp/player.maxHp*100)+"%";
     document.getElementById("mpFill").style.width=(player.mp/player.maxMp*100)+"%";
@@ -96,177 +77,87 @@ function updateStatus(){
     document.getElementById("vipDisplay").innerText=player.vipLevel;
     document.getElementById("coinsDisplay").innerText=player.coins;
 }
+function updateCharacterView(){
+    charDiv.style.left=player.x+"px"; charDiv.style.top=player.y+"px";
+    charWeapon.src = player.equipment.weapon ? player.equipment.weapon.img : '';
+    charArmor.src = player.equipment.armor ? player.equipment.armor.img : '';
+    charShield.src = player.equipment.shield ? player.equipment.shield.img : '';
+}
 
 // Инвентарь
+const invDiv=document.getElementById("inventory");
 function updateInventory(){
-    const invDiv=document.getElementById("inventory");
     invDiv.innerHTML="";
-    for(let key in player.equipment){
-        if(player.equipment[key]){
-            const div=document.createElement("div");
-            div.className="item";
-            div.style.backgroundImage=`url(${player.equipment[key].img})`;
-            div.title=player.equipment[key].name;
-            invDiv.appendChild(div);
-        }
-    }
-}
-
-// Выбор класса и пола
-function selectClass(cls){ player.class=cls; checkSelectionComplete(); }
-function selectGender(g){ player.gender=g; checkSelectionComplete(); }
-
-function checkSelectionComplete(){
-    if(player.class && player.gender){
-        document.getElementById("classGenderSelection").classList.add("hidden");
-        mapDiv.classList.remove("hidden");
-        document.getElementById("status").classList.remove("hidden");
-        document.getElementById("inventory").classList.remove("hidden");
-        document.getElementById("log").classList.remove("hidden");
-        document.getElementById("gameControls").classList.remove("hidden");
-        updateCharacterImage();
-        initGameObjects();
-        log(`Вы выбрали: ${player.class}, пол: ${player.gender}`);
-    }
-}
-
-// Обновление картинки персонажа
-function updateCharacterImage(){
-    let img='https://i.imgur.com/4c6wqdn.png'; // Warrior male
-    if(player.class=='Mage') img='https://i.imgur.com/5Uq2KHu.png';
-    if(player.class=='Archer') img='https://i.imgur.com/1vTtOkM.png';
-    if(player.gender=='female'){
-        if(player.class=='Warrior') img='https://i.imgur.com/3tY7aLp.png';
-        if(player.class=='Mage') img='https://i.imgur.com/ZtFJqP1.png';
-        if(player.class=='Archer') img='https://i.imgur.com/vl4oZT6.png';
-    }
-    characterDiv.innerHTML=`<img src="${img}">`;
-}
-
-// Объекты игры
-let monsters=[],loots=[],shops=[];
-let monstersData = [
-    {x:0, y:0, name:"Гоблин", hp:50, maxHp:50, exp:20, coins:10, img:"https://i.imgur.com/EhFz7ON.png"},
-    {x:4, y:4, name:"Орк", hp:100, maxHp:100, exp:50, coins:30, img:"https://i.imgur.com/2aXlQ9m.png"},
-    {x:1, y:3, name:"Скелет", hp:40, maxHp:40, exp:15, coins:5, img:"https://i.imgur.com/XtZ0OiB.png"}
-];
-
-// Лут
-function spawnLoot(x,y,img,name,type="weapon"){
-    const div=document.createElement("div"); div.className="loot";
-    div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
-    div.innerHTML=`<img src="${img}">`;
-    div.onclick=()=>{ player.equipment[type]={name,img}; updateInventory(); log(`Подобрано ${name}`); div.remove(); };
-    mapDiv.appendChild(div); loots.push({x,y,div});
-}
-
-// Магазин
-function spawnShop(x,y,img="https://i.imgur.com/7c3tN2B.png"){
-    const div=document.createElement("div"); div.className="shop"; div.style.left=x*tileSize+10+"px"; div.style.top=y*tileSize+10+"px";
-    div.innerHTML=`<img src="${img}">`;
-    div.onclick=()=>{
-        const choice=prompt("Купить: 1-HP 2-MP (10 монет)");
-        if(choice=="1" && player.coins>=10){player.coins-=10;player.hp=Math.min(player.maxHp,player.hp+50); log("💖 Куплено HP");}
-        else if(choice=="2" && player.coins>=10){player.coins-=10;player.mp=Math.min(player.maxMp,player.mp+30); log("🔮 Куплено MP");}
-        else log("Недостаточно монет"); updateStatus();
-    };
-    mapDiv.appendChild(div); shops.push({x,y,div});
-}
-
-// Инициализация монстров
-function initMonsters(){
-    monstersData.forEach(m=>{
-        const div=document.createElement("div"); div.className="monster";
-        div.style.left=m.x*tileSize+10+"px"; div.style.top=m.y*tileSize+10+"px";
-        div.innerHTML=`<img src="${m.img}">`;
-        mapDiv.appendChild(div);
-        m.div=div; monsters.push(m);
+    player.inventory.forEach((item,idx)=>{
+        const div=document.createElement("div");
+        div.className="item"; div.style.backgroundImage=`url(${item.img})`;
+        div.title=`${item.name}\n${item.bonus?JSON.stringify(item.bonus):''}`;
+        div.innerHTML=`<span>${item.type}</span>`;
+        div.onclick=()=>equipItem(idx);
+        invDiv.appendChild(div);
     });
 }
 
-// Инициализация игры
-function initGameObjects(){
-    initMonsters();
-    spawnLoot(2,1,"https://i.imgur.com/OY8o0jA.png","Меч");
-    spawnLoot(3,2,"https://i.imgur.com/7c3tN2B.png","Зелье HP");
-    spawnShop(2,0,"https://i.imgur.com/7c3tN2B.png");
+function equipItem(index){
+    const item=player.inventory[index];
+    player.equipment[item.type]=item;
+    updateCharacterView();
+}
+
+// Лут с редкостью
+function generateLoot(){
+    const rarityTable=[
+        {name:"Меч новичка", type:"weapon", img:"https://i.imgur.com/OY8o0jA.png", rarity:"common", bonus:{strength:1}},
+        {name:"Доспех редкий", type:"armor", img:"https://i.imgur.com/7c3tN2B.png", rarity:"rare", bonus:{hp:20}},
+        {name:"Щит эпический", type:"shield", img:"https://i.imgur.com/8hG8fXQ.png", rarity:"epic", bonus:{crit:5}},
+        {name:"Меч легендарный", type:"weapon", img:"https://i.imgur.com/ZtFJqP1.png", rarity:"legendary", bonus:{strength:5, crit:10}}
+    ];
+    const roll=Math.random();
+    let item;
+    if(roll<0.5) item=rarityTable[0];
+    else if(roll<0.75) item=rarityTable[1];
+    else if(roll<0.9) item=rarityTable[2];
+    else item=rarityTable[3];
+    player.inventory.push(item);
+    log(`🎁 Выпал лут: ${item.name} (${item.rarity})`);
+    updateInventory();
+}
+
+// Донат с бонусами
+function donate(){
+    let amount=parseInt(prompt("Введите сумму пополнения:"));
+    if(!amount||amount<=0) return;
+    player.coins+=amount;
+    if(player.firstTopup){
+        player.firstTopup=false;
+        const bonusItem={name:"Меч новичка+1", type:"weapon", img:"https://i.imgur.com/OY8o0jA.png", rarity:"legendary", bonus:{strength:5, crit:5}};
+        player.inventory.push(bonusItem);
+        log("🎉 Первое пополнение! Получен бонус: "+bonusItem.name);
+    }
+    const vipGain=Math.floor(amount/100);
+    player.vipLevel+=vipGain;
+    player.exp+=vipGain*10; // VIP бонус к опыту
+    log(`💎 Донат: ${amount}, VIP +${vipGain}, EXP +${vipGain*10}`);
     updateInventory(); updateStatus();
 }
 
-// Управление клавишами
-document.addEventListener("keydown",(e)=>{
-    if(e.key=="ArrowUp") moveTo(player.x, player.y-1);
-    if(e.key=="ArrowDown") moveTo(player.x, player.y+1);
-    if(e.key=="ArrowLeft") moveTo(player.x-1, player.y);
-    if(e.key=="ArrowRight") moveTo(player.x+1, player.y);
-});
-
-// Перемещение и атака
-function moveTo(x,y){
-    if(x<0||y<0||x>4||y>4) return;
-    player.x=x; player.y=y;
-    characterDiv.style.left=x*tileSize+10+"px";
-    characterDiv.style.top=y*tileSize+10+"px";
-    monsters.forEach(m=>{ if(m.x==x && m.y==y) attackMonster(m); });
-    loots.forEach(l=>{ if(l.x==x && l.y==y) log("✨ Рядом лут!"); });
-    shops.forEach(s=>{ if(s.x==x && s.y==y) log("🏪 Рядом магазин!"); });
-}
-
-// Бой
-function attackMonster(monster){
-    let damage = Math.floor(Math.random()*20+5 + player.skills.strength*2);
-    monster.hp -= damage; log(`💥 Урон ${monster.name}: ${damage}`);
-    if(monster.hp<=0){
-        log(`💀 ${monster.name} повержен! +${monster.exp} XP, +${monster.coins} монет`);
-        player.exp+=monster.exp; player.coins+=monster.coins;
-        dropLoot(monster.x,monster.y); monster.div.remove();
-        monsters=monsters.filter(m=>m!==monster); checkLevelUp(); updateStatus();
-    } else setTimeout(()=>monsterAttack(monster),300);
-}
-function monsterAttack(monster){
-    let damage = Math.floor(Math.random()*15+5);
-    player.hp -= damage; if(player.hp<0) player.hp=0;
-    log(`👹 ${monster.name} атакует ${damage}`);
-    updateStatus();
-}
-function dropLoot(x,y){ spawnLoot(x,y,"https://i.imgur.com/OY8o0jA.png","Меч"); }
-
-// Донат
-function donate(){
-    let amount = prompt("Введите сумму пополнения (руб):"); amount=parseInt(amount);
-    if(!amount || amount<=0) return;
-    let vipGain = Math.floor(amount/100);
-    player.vipLevel += vipGain; player.coins+=amount;
-    log(`💎 Донат ${amount}! VIP +${vipGain}, монеты +${amount}`);
-    updateStatus();
-}
-
-// Древо навыков
+// Навыки
 function openSkillTree(){ document.getElementById("skillTreeModal").classList.remove("hidden"); updateSkillTree(); }
 function closeSkillTree(){ document.getElementById("skillTreeModal").classList.add("hidden"); }
 function updateSkillTree(){
-    const skillsDiv = document.getElementById("skillsList"); skillsDiv.innerHTML="";
-    document.getElementById("skillPoints").innerText = player.skillPoints;
+    const skillsDiv=document.getElementById("skillsList"); skillsDiv.innerHTML="";
+    document.getElementById("skillPoints").innerText=player.skillPoints;
     for(let key in player.skills){
-        let div = document.createElement("div");
-        div.innerHTML = `${key.toUpperCase()}: ${player.skills[key]} <button onclick="upgradeSkill('${key}')">+</button>`;
+        let div=document.createElement("div");
+        div.innerHTML=`${key.toUpperCase()}: ${player.skills[key]} <button onclick="upgradeSkill('${key}')">+</button>`;
         skillsDiv.appendChild(div);
     }
 }
 function upgradeSkill(skill){ if(player.skillPoints<=0) return; player.skills[skill]+=1; player.skillPoints-=1; log(`🆙 ${skill.toUpperCase()} +1`); updateSkillTree(); }
 
-// Уровень
-function checkLevelUp(){
-    while(player.exp>=player.nextLevelExp){
-        player.exp-=player.nextLevelExp;
-        player.level+=1; player.maxHp+=20; player.hp=player.maxHp;
-        player.maxMp+=10; player.mp=player.maxMp;
-        player.nextLevelExp=Math.floor(player.nextLevelExp*1.5);
-        player.skillPoints+=3;
-        log(`⭐ Уровень ${player.level}! 3 очка навыков`);
-        updateStatus(); updateSkillTree();
-    }
-}
+// Тестовые кнопки
+setInterval(generateLoot, 10000); // каждые 10 секунд лут падает
+updateCharacterView(); updateInventory(); updateStatus();
 </script>
 
 </body>
