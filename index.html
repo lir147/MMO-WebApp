@@ -1,74 +1,256 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>MMO RPG</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; text-align: center; }
-        #game { margin: 20px auto; width: 600px; padding: 20px; border: 2px solid #fff; border-radius: 10px; background: #333; }
-        button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-        #log { text-align: left; margin-top: 20px; height: 200px; overflow-y: auto; border: 1px solid #fff; padding: 10px; }
-    </style>
+<meta charset="UTF-8">
+<title>MMO RPG</title>
+<style>
+body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; text-align: center; }
+#game { margin: 20px auto; width: 720px; padding: 20px; border: 2px solid #fff; border-radius: 10px; background: #333; }
+button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+#log { text-align: left; margin-top: 20px; height: 250px; overflow-y: auto; border: 1px solid #fff; padding: 10px; }
+.inventory { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.item { width: 40px; height: 40px; margin: 5px; border: 1px solid #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.skin { width: 60px; height: 60px; margin: 5px; border: 2px solid #fff; border-radius: 50%; display: inline-block; background-size: cover; cursor: pointer; }
+#map { margin-top: 20px; }
+</style>
 </head>
 <body>
-    <div id="game">
-        <h2>Добро пожаловать в RPG!</h2>
-        <div id="character">Выберите класс:</div>
+
+<div id="game">
+    <h2>Добро пожаловать в MMO RPG!</h2>
+
+    <!-- Выбор класса -->
+    <div id="classSelection">
+        <h3>Выберите персонажа:</h3>
         <button onclick="selectClass('Warrior')">⚔️ Воин</button>
         <button onclick="selectClass('Mage')">🪄 Маг</button>
         <button onclick="selectClass('Archer')">🏹 Лучник</button>
-
-        <div id="menu" style="display:none;">
-            <h3 id="status"></h3>
-            <button onclick="showMap()">🗺️ Показать карту</button>
-            <button onclick="getLoot()">⚔️ Получить лут</button>
-            <button onclick="showInventory()">📦 Инвентарь</button>
-            <button onclick="showCharacter()">🔄 Персонаж</button>
-        </div>
-
-        <div id="log"></div>
     </div>
 
-    <script>
-        let player = { name: "Игрок", class: "", hp: 0, mp: 0, inventory: [] };
+    <!-- Выбор скина -->
+    <div id="skinSelection" style="display:none;">
+        <h3>Выберите скин:</h3>
+        <div class="skin" onclick="selectSkin('Red')" style="background-color:#ff0000;"></div>
+        <div class="skin" onclick="selectSkin('Blue')" style="background-color:#0000ff;"></div>
+        <div class="skin" onclick="selectSkin('Green')" style="background-color:#00ff00;"></div>
+    </div>
 
-        function log(msg) {
-            const logDiv = document.getElementById("log");
-            logDiv.innerHTML += msg + "<br>";
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
+    <!-- Основное меню -->
+    <div id="menu" style="display:none;">
+        <h3 id="status"></h3>
+        <button onclick="fightCurrentMonster()">👾 Сразиться с монстром</button>
+        <button onclick="showInventory()">📦 Инвентарь</button>
+        <button onclick="usePotion('hp')">❤️ Зелье HP</button>
+        <button onclick="usePotion('mp')">⚡ Зелье MP</button>
+        <button onclick="showCharacter()">🔄 Персонаж</button>
+        <button onclick="buyVIP()">💎 Купить VIP</button>
+    </div>
 
-        function selectClass(cls) {
-            player.class = cls;
-            if (cls === "Warrior") { player.hp=120; player.mp=30; }
-            if (cls === "Mage") { player.hp=60; player.mp=100; }
-            if (cls === "Archer") { player.hp=80; player.mp=50; }
+    <!-- Карта -->
+    <div id="map" style="display:none;">
+        <h3>Карта</h3>
+        <div id="zoneName"></div>
+        <button onclick="move('up')">⬆️ Вверх</button>
+        <button onclick="move('down')">⬇️ Вниз</button>
+        <button onclick="move('left')">⬅️ Влево</button>
+        <button onclick="move('right')">➡️ Вправо</button>
+    </div>
 
-            document.getElementById("character").style.display="none";
-            document.getElementById("menu").style.display="block";
-            document.getElementById("status").innerText = `${player.class} - HP:${player.hp} MP:${player.mp}`;
-            log(`Вы выбрали класс ${cls}`);
-        }
+    <div id="log"></div>
+    <div class="inventory" id="inventoryDiv"></div>
+</div>
 
-        function showMap() {
-            log("🌍 Вы открыли карту! [сюда можно вставить изображение карты]");
-        }
+<script>
+// Игрок
+let player = null;
 
-        function getLoot() {
-            const items = ["Меч", "Посох", "Лук", "Щит", "Зелье"];
-            const item = items[Math.floor(Math.random()*items.length)];
-            player.inventory.push(item);
-            log(`🎉 Вы получили: ${item}`);
-        }
+// Лут
+const lootTable = [
+    {name: "Меч", icon: "🗡️", rarity:"common"},
+    {name: "Щит", icon: "🛡️", rarity:"common"},
+    {name: "Зелье HP", icon: "❤️", rarity:"common"},
+    {name: "Зелье MP", icon: "⚡", rarity:"common"},
+    {name: "Посох", icon: "🪄", rarity:"rare"},
+    {name: "Лук", icon: "🏹", rarity:"rare"}
+];
 
-        function showInventory() {
-            if(player.inventory.length===0) { log("📭 Инвентарь пуст"); return; }
-            log("📦 Инвентарь: " + player.inventory.join(", "));
-        }
+// Монстры
+const monsters = [
+    {name:"Скелет", hp:30, exp:20},
+    {name:"Зомби", hp:40, exp:30},
+    {name:"Дракон", hp:80, exp:100}
+];
 
-        function showCharacter() {
-            log(`🧑‍💻 Персонаж: ${player.name} | Класс: ${player.class} | HP:${player.hp} MP:${player.mp}`);
-        }
-    </script>
+// Карта 3x3
+const map = [
+    [{name:"Лес"}, {name:"Река"}, {name:"Горы"}],
+    [{name:"Деревня"}, {name:"Поляна"}, {name:"Пещера"}],
+    [{name:"Замок"}, {name:"Тундра"}, {name:"Пустошь"}]
+];
+let playerPos = {x:1, y:1};
+
+// Лог
+function log(msg){
+    const logDiv = document.getElementById("log");
+    logDiv.innerHTML += msg + "<br>";
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// Выбор класса
+function selectClass(cls){
+    if(player) return;
+    player = {
+        name:"Игрок",
+        class:cls,
+        skin:"Default",
+        level:1,
+        exp:0,
+        nextLevelExp:100,
+        hp: cls==="Warrior"?120:cls==="Mage"?60:80,
+        maxHp: cls==="Warrior"?120:cls==="Mage"?60:80,
+        mp: cls==="Warrior"?30:cls==="Mage"?100:50,
+        maxMp: cls==="Warrior"?30:cls==="Mage"?100:50,
+        strength: cls==="Warrior"?20:cls==="Mage"?5:10,
+        agility: cls==="Warrior"?10:cls==="Mage"?10:15,
+        intelligence: cls==="Warrior"?5:cls==="Mage"?20:10,
+        inventory: [],
+        coins: 0,
+        vip: false,
+        firstDonationReceived:false
+    };
+    document.getElementById("classSelection").style.display="none";
+    document.getElementById("skinSelection").style.display="block";
+}
+
+// Выбор скина
+function selectSkin(skin){
+    player.skin = skin;
+    document.getElementById("skinSelection").style.display="none";
+    document.getElementById("menu").style.display="block";
+    document.getElementById("map").style.display="block";
+    updateStatus();
+    log(`Вы выбрали класс ${player.class} скином ${skin}`);
+    updateZone();
+}
+
+// Обновление статуса
+function updateStatus(){
+    document.getElementById("status").innerText = `${player.class} - LV:${player.level} HP:${player.hp}/${player.maxHp} MP:${player.mp}/${player.maxMp} 💎${player.coins}`;
+}
+
+// Перемещение по карте
+function move(direction){
+    if(direction==="up" && playerPos.y>0) playerPos.y--;
+    if(direction==="down" && playerPos.y<2) playerPos.y++;
+    if(direction==="left" && playerPos.x>0) playerPos.x--;
+    if(direction==="right" && playerPos.x<2) playerPos.x++;
+    updateZone();
+}
+
+function updateZone(){
+    const zone = map[playerPos.y][playerPos.x];
+    document.getElementById("zoneName").innerText = `Зона: ${zone.name}`;
+    spawnMonster(zone);
+}
+
+// Спавн монстров
+function spawnMonster(zone){
+    if(!zone.currentMonster){
+        const monster = {...monsters[Math.floor(Math.random()*monsters.length)]};
+        zone.currentMonster = monster;
+        log(`👾 В этой зоне появился монстр: ${monster.name}`);
+    }
+}
+
+// Бой с монстром
+function fightCurrentMonster(){
+    const zone = map[playerPos.y][playerPos.x];
+    if(!zone.currentMonster) { log("❌ Здесь нет монстров"); return; }
+    const monster = zone.currentMonster;
+
+    const damage = Math.floor(Math.random()*player.hp/3)+5;
+    const playerDamage = Math.floor(Math.random()*monster.hp/2)+10;
+
+    if(playerDamage>=monster.hp){
+        const loot = lootTable[Math.floor(Math.random()*lootTable.length)];
+        player.inventory.push(loot);
+        player.exp += monster.exp;
+        player.coins += Math.floor(Math.random()*20)+5;
+        log(`🎉 Вы победили ${monster.name} и получили: ${loot.icon} ${loot.name}, опыт: ${monster.exp}, монеты: ${player.coins}`);
+        levelUp();
+        updateInventory();
+        zone.currentMonster = null;
+    } else {
+        player.hp -= damage;
+        if(player.hp<=0){ player.hp=0; log("💀 Вы были побеждены!"); }
+        else log(`👾 Сражение с ${monster.name}, получили ${damage} урона`);
+    }
+    updateStatus();
+}
+
+// Повышение уровня
+function levelUp(){
+    while(player.exp >= player.nextLevelExp){
+        player.level++;
+        player.exp -= player.nextLevelExp;
+        player.nextLevelExp = Math.floor(player.nextLevelExp*1.5);
+        player.maxHp += 20;
+        player.maxMp += 10;
+        player.hp = player.maxHp;
+        player.mp = player.maxMp;
+        log(`🎉 Поздравляем! Вы достигли уровня ${player.level}`);
+    }
+}
+
+// Инвентарь
+function showInventory(){ updateInventory(); }
+function updateInventory(){
+    const invDiv = document.getElementById("inventoryDiv");
+    invDiv.innerHTML="";
+    for(const item of player.inventory){
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerText = item.icon;
+        div.title = item.name;
+        invDiv.appendChild(div);
+    }
+}
+
+// Зелья
+function usePotion(type){
+    if(type==="hp"){
+        player.hp = Math.min(player.hp+50, player.maxHp);
+        log("❤️ Вы использовали зелье здоровья");
+    }
+    if(type==="mp"){
+        player.mp = Math.min(player.mp+30, player.maxMp);
+        log("⚡ Вы использовали зелье маны");
+    }
+    updateStatus();
+}
+
+// Показ персонажа
+function showCharacter(){
+    log(`🧑‍💻 ${player.name} | Класс: ${player.class} | Скин: ${player.skin} | LV:${player.level} | HP:${player.hp}/${player.maxHp} MP:${player.mp}/${player.maxMp} 💎${player.coins}`);
+}
+
+// VIP
+function buyVIP(){
+    if(player.vip){ log("Вы уже VIP!"); return; }
+    if(player.coins >= 50){
+        player.coins -= 50;
+        player.vip = true;
+        if(!player.firstDonationReceived){
+            const bonus = {name:"Эпический Меч", icon:"⚔️", rarity:"epic"};
+            player.inventory.push(bonus);
+            player.firstDonationReceived = true;
+            log("💎 Вы стали VIP! Получили бонусное снаряжение: " + bonus.icon + " " + bonus.name);
+        } else { log("💎 Вы стали VIP!"); }
+        updateInventory();
+        updateStatus();
+    } else { log("💰 Недостаточно монет для покупки VIP (50 монет)"); }
+}
+</script>
+
 </body>
 </html>
