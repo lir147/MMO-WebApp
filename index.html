@@ -1,197 +1,43 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>MMO RPG WebApp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { font-family: Arial; margin:0; padding:0; background:#1e1e1e; color:white; }
-    .game { text-align:center; padding:15px; }
-    img { border-radius:8px; }
-    button { margin:5px; padding:8px 12px; border:none; border-radius:6px; background:#4CAF50; color:white; font-size:14px; }
-    button:hover { background:#45a049; cursor:pointer; }
-    .panel { margin-top:15px; background:#2e2e2e; padding:10px; border-radius:10px; text-align:left; }
-    .inv-item { display:flex; align-items:center; margin:4px 0; cursor:pointer; }
-    .inv-item img { width:40px; height:40px; margin-right:8px; }
-    .rarity-common { color: #bbb; }
-    .rarity-rare { color: #4aa3ff; }
-    .rarity-epic { color: #b84aff; }
-    .rarity-legendary { color: #ffcc00; font-weight:bold; }
-    #log { margin-top:10px; min-height:30px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMO Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="game">
-    <h1>🌍 Карта</h1>
-    <img src="https://i.ibb.co/6Wfj2M5/fantasy-map.jpg" width="95%">
+    <div id="game-container">
+        <!-- Интерфейс выбора класса и пола -->
+        <div id="selection-screen">
+            <h2>Выберите персонажа</h2>
+            <button onclick="selectClass('warrior')">Воин</button>
+            <button onclick="selectClass('mage')">Маг</button>
+            <button onclick="selectClass('archer')">Лучник</button>
+            <h3>Выберите пол</h3>
+            <button onclick="selectGender('male')">Мужской</button>
+            <button onclick="selectGender('female')">Женский</button>
+        </div>
 
-    <h2>🧙 Персонаж: <span id="character">Воин</span></h2>
-    <p>Уровень: <span id="level">1</span> | Опыт: <span id="exp">0</span>/100 | Очки навыков: <span id="skill-points">0</span></p>
-
-    <img id="player-img" src="https://i.ibb.co/RzVztcT/warrior.png" width="120">
-
-    <div>
-      <button onclick="attack()">⚔️ Атаковать</button>
-      <button onclick="showInventory()">🎒 Инвентарь</button>
-      <button onclick="showEquipment()">🛡️ Экипировка</button>
-      <button onclick="showStats()">📊 Характеристики</button>
-      <button onclick="showSkills()">🌟 Навыки</button>
+        <!-- Игровой экран -->
+        <div id="game-screen" style="display:none">
+            <div id="player-info">
+                <h3 id="player-name"></h3>
+                <p>Уровень: <span id="player-level">1</span> | VIP: <span id="player-vip">0</span></p>
+            </div>
+            <div id="map-container">
+                <img id="map-img" src="https://opengameart.org/sites/default/files/map_tile.png" alt="Map">
+            </div>
+            <div id="character-container">
+                <img id="character-img" src="" alt="Character">
+            </div>
+            <div id="inventory-container">
+                <h3>Инвентарь</h3>
+                <div id="inventory-items"></div>
+            </div>
+            <button onclick="donate()">Пополнить VIP</button>
+        </div>
     </div>
-
-    <div id="log"></div>
-
-    <!-- Инвентарь -->
-    <div class="panel" id="inventory" style="display:none;">
-      <h3>🎒 Инвентарь</h3>
-      <ul id="items"></ul>
-    </div>
-
-    <!-- Экипировка -->
-    <div class="panel" id="equipment" style="display:none;">
-      <h3>🛡️ Экипировка</h3>
-      <p>Оружие: <span id="slot-weapon">-</span></p>
-      <p>Броня: <span id="slot-armor">-</span></p>
-      <p>Аксессуар: <span id="slot-accessory">-</span></p>
-    </div>
-
-    <!-- Характеристики -->
-    <div class="panel" id="stats" style="display:none;">
-      <h3>📊 Характеристики</h3>
-      <p>❤️ HP: <span id="stat-hp">100</span></p>
-      <p>🔮 MP: <span id="stat-mp">50</span></p>
-      <p>⚔️ Сила: <span id="stat-str">10</span></p>
-      <p>🛡️ Защита: <span id="stat-def">5</span></p>
-      <p>📖 Интеллект: <span id="stat-int">5</span></p>
-      <p>🏹 Ловкость: <span id="stat-agi">5</span></p>
-    </div>
-
-    <!-- Навыки -->
-    <div class="panel" id="skills" style="display:none;">
-      <h3>🌟 Древо навыков</h3>
-      <p><button onclick="upgradeSkill('str')">⚔️ Сила +1</button></p>
-      <p><button onclick="upgradeSkill('def')">🛡️ Защита +1</button></p>
-      <p><button onclick="upgradeSkill('int')">📖 Магия +1</button></p>
-      <p><button onclick="upgradeSkill('agi')">🏹 Ловкость +1</button></p>
-    </div>
-  </div>
-
-<script>
-  const tg = window.Telegram.WebApp;
-
-  let level = 1, exp = 0, expToNext = 100;
-  let skillPoints = 0;
-
-  // Базовые статы
-  let stats = { hp: 100, mp: 50, str: 10, def: 5, int: 5, agi: 5 };
-
-  let inventory = [];
-  let equipment = { weapon: null, armor: null, accessory: null };
-
-  // Лут
-  const lootTable = [
-    {name:"Меч новичка", img:"https://i.ibb.co/tMr7JdD/sword.png", rarity:"common", bonus:"+2 сила", slot:"weapon", stats:{str:2}},
-    {name:"Стальной щит", img:"https://i.ibb.co/FXpFQ7W/shield.png", rarity:"rare", bonus:"+5 защита", slot:"armor", stats:{def:5}},
-    {name:"Кольцо мага", img:"https://i.ibb.co/zf6V0cQ/magic-ring.png", rarity:"epic", bonus:"+8 интеллект", slot:"accessory", stats:{int:8}},
-    {name:"Зелье HP", img:"https://i.ibb.co/vXBKyMc/hp-potion.png", rarity:"common", bonus:"Восстановление 50 HP", slot:"consumable", heal:50},
-    {name:"Легендарный меч", img:"https://i.ibb.co/SRVdXy1/legendary-sword.png", rarity:"legendary", bonus:"+15 сила +5% крит", slot:"weapon", stats:{str:15, agi:5}}
-  ];
-
-  const monsters = [
-    {name:"Гоблин", img:"https://i.ibb.co/zJVRr0p/goblin.png"},
-    {name:"Орк", img:"https://i.ibb.co/Lrb6n5z/orc.png"},
-    {name:"Дракон", img:"https://i.ibb.co/VtB8zWg/dragon.png"}
-  ];
-
-  function attack() {
-    let monster = monsters[Math.floor(Math.random() * monsters.length)];
-    let loot = lootTable[Math.floor(Math.random() * lootTable.length)];
-    let expGain = Math.floor(Math.random() * 30) + 20;
-
-    exp += expGain;
-    if (exp >= expToNext) {
-      level++;
-      skillPoints++;
-      exp = exp - expToNext;
-      expToNext += 50;
-      document.getElementById("log").innerHTML = `🔥 Новый уровень ${level}! Очки навыков: +1`;
-    } else {
-      document.getElementById("log").innerHTML = `⚔️ Побеждён ${monster.name}! Дроп: ${loot.name}, +${expGain} XP.`;
-    }
-
-    inventory.push(loot);
-    updateUI();
-  }
-
-  function updateUI() {
-    document.getElementById("level").textContent = level;
-    document.getElementById("exp").textContent = exp;
-    document.getElementById("skill-points").textContent = skillPoints;
-    document.getElementById("stat-hp").textContent = stats.hp;
-    document.getElementById("stat-mp").textContent = stats.mp;
-    document.getElementById("stat-str").textContent = stats.str;
-    document.getElementById("stat-def").textContent = stats.def;
-    document.getElementById("stat-int").textContent = stats.int;
-    document.getElementById("stat-agi").textContent = stats.agi;
-  }
-
-  function showInventory() {
-    toggle("inventory");
-    document.getElementById("items").innerHTML = inventory.map(
-      (i, idx) => `<li class="inv-item" onclick="equip(${idx})">
-        <img src="${i.img}">
-        <span class="rarity-${i.rarity}">${i.name}</span> - ${i.bonus}
-      </li>`
-    ).join("");
-  }
-
-  function showEquipment() {
-    toggle("equipment");
-    document.getElementById("slot-weapon").textContent = equipment.weapon ? equipment.weapon.name : "-";
-    document.getElementById("slot-armor").textContent = equipment.armor ? equipment.armor.name : "-";
-    document.getElementById("slot-accessory").textContent = equipment.accessory ? equipment.accessory.name : "-";
-  }
-
-  function showStats() { toggle("stats"); }
-  function showSkills() { toggle("skills"); }
-
-  function toggle(id) {
-    let el = document.getElementById(id);
-    el.style.display = el.style.display === "none" ? "block" : "none";
-  }
-
-  function equip(index) {
-    let item = inventory[index];
-    if (item.slot === "consumable") {
-      stats.hp += item.heal;
-      document.getElementById("log").innerHTML = `🧪 Использовано: ${item.name} (+${item.heal} HP)`;
-      inventory.splice(index, 1);
-    } else {
-      equipment[item.slot] = item;
-      applyStats(item.stats);
-      document.getElementById("log").innerHTML = `✅ Экипирован: ${item.name}`;
-    }
-    updateUI();
-    showInventory();
-    showEquipment();
-  }
-
-  function applyStats(bonus) {
-    for (let key in bonus) stats[key] += bonus[key];
-  }
-
-  function upgradeSkill(type) {
-    if (skillPoints > 0) {
-      stats[type] += 1;
-      skillPoints--;
-      document.getElementById("log").innerHTML = `🌟 Навык улучшен: ${type}`;
-      updateUI();
-    } else {
-      document.getElementById("log").innerHTML = `❌ Нет очков навыков`;
-    }
-  }
-
-  updateUI();
-</script>
+    <script src="app.js"></script>
 </body>
 </html>

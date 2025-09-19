@@ -1,0 +1,45 @@
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: #fff;
+}
+
+#game-container {
+    max-width: 480px;
+    margin: auto;
+    padding: 10px;
+}
+
+#selection-screen, #game-screen {
+    text-align: center;
+}
+
+button {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #444;
+    color: #fff;
+}
+
+button:hover {
+    background-color: #666;
+}
+
+#map-container img {
+    width: 100%;
+}
+
+#character-container img {
+    width: 100px;
+    display: block;
+    margin: 10px auto;
+}
+
+#inventory-items img {
+    width: 50px;
+    margin: 2px;
+}
