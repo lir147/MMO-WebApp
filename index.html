@@ -2,214 +2,223 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Mini-RPG с альтернативными открытыми картинками</title>
+<title>Mini-MMO UI + Логика</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  body { background:#111; color:#fff; font-family: Arial, sans-serif; text-align:center; margin:0; padding:0;}
-  #game { margin:20px auto; width:95vw; max-width:600px; height:50vw; max-height:600px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; }
-  .character, .monster { width:60px; height:60px; position:absolute; border-radius:8px; box-shadow: 0 0 10px #000a; }
-  .character img, .monster img { width:100%; height:100%; border-radius:8px; image-rendering:pixelated; }
-  /* Стили для статусов, инвентаря, кнопок и логов из предыдущих примеров */
+  body, html {
+    margin:0; padding:0; height:100%;
+    background:#0e1117; color:#fff;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background:#181c26;
+    padding:8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+  .player-info {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .player-name { font-weight:bold; }
+  .bar-container {
+    background:#333; border-radius:6px; overflow: hidden;
+    width: 120px; height: 14px; position: relative;
+  }
+  .bar-fill {
+    height: 100%; background: #12b412; width: 90%;
+    transition: width 0.3s ease;
+  }
+  .bar-mp { background:#2c83ff; width: 80%; }
+  .currency {
+    display: flex; gap: 10px; align-items: center;
+  }
+  .currency span {
+    background:#222b; padding:4px 8px; border-radius: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .currency img {
+    width:18px; height:18px;
+  }
+  .shop-button {
+    background: linear-gradient(45deg, #f98012, #ffbd43);
+    color: #000; font-weight: bold; border-radius: 12px;
+    padding: 6px 14px; cursor: pointer;
+  }
+  main {
+    flex-grow: 1;
+    position: relative;
+    background: url('https://i.imgur.com/NxD0aAf.jpg') no-repeat center center;
+    background-size: cover;
+  }
+  .floating-buttons {
+    position: absolute; top: 60px; right: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .floating-buttons button {
+    background:#000d; border:none; border-radius:24px;
+    padding: 10px 18px; color:#fff; font-weight: bold;
+    cursor: pointer; box-shadow: 0 0 8px #0009;
+    white-space: nowrap;
+  }
+  .center-buttons {
+    position: absolute; bottom: 80px; width: 100%;
+    display: flex; justify-content: center; gap: 20px;
+  }
+  .center-buttons button {
+    background: linear-gradient(45deg, #415156, #66727a);
+    color: #fff; border:none; border-radius:12px;
+    padding: 14px 36px; font-size: 18px; cursor: pointer;
+    box-shadow: 0 0 10px #0008;
+  }
+  nav {
+    background:#181c26; display: flex;
+    justify-content: space-around; align-items: center;
+    padding: 10px 0;
+  }
+  nav button {
+    background:none; border:none; color:#ccc;
+    font-size: 14px; cursor: pointer;
+    transition: color 0.3s;
+  }
+  nav button.active {
+    color:#fff; font-weight: bold;
+    border-top: 2px solid #67aceb; padding-top: 8px;
+  }
+  #content-area {
+    max-width: 600px;
+    margin: 15px auto;
+    background: #222a;
+    border-radius: 10px;
+    padding: 15px;
+    color: #ddd;
+    font-size: 16px;
+    height: 150px;
+    overflow-y: auto;
+  }
 </style>
 </head>
 <body>
 
-<h1>Mini-RPG Demo</h1>
+<header>
+  <div class="player-info" aria-label="Информация о персонаже">
+    <div class="player-name" id="playerName">kOrEs (5 ур.)</div>
+    <div class="bar-container" aria-label="Здоровье">
+      <div class="bar-fill" id="hpBar" style="width: 90%;"></div>
+    </div>
+    <div class="bar-container" aria-label="Мана">
+      <div class="bar-fill bar-mp" id="mpBar" style="width: 80%;"></div>
+    </div>
+  </div>
+  <div class="currency" aria-label="Валюта">
+    <span><img src="https://i.imgur.com/Otj9u6p.png" alt="Золото" /> <span id="goldAmount">0</span></span>
+    <span><img src="https://i.imgur.com/Y6XQxyc.png" alt="Серебро" /> <span id="silverAmount">377</span></span>
+  </div>
+  <div class="shop-button" tabindex="0" role="button" aria-label="Магазин" id="shopButton">Магазин</div>
+</header>
 
-<div id="game" aria-label="Игровое поле" role="main" tabindex="0"></div>
+<main aria-label="Игровое поле">
+  <div class="floating-buttons" role="group" aria-label="Дополнительные действия">
+    <button id="vipBtn">VIP: Истек</button>
+    <button id="supportBtn">Поддержать</button>
+    <button id="communityBtn">Сообщество</button>
+    <button id="invitesBtn">Приглашения</button>
+    <button id="groupBtn">Группа</button>
+  </div>
+  <div class="center-buttons">
+    <button id="battlesBtn">Сражения</button>
+    <button id="buildingsBtn">Строения</button>
+  </div>
+</main>
 
-<div id="status" style="max-width:600px; margin:10px auto; text-align:left;">
-  HP: <progress id="hpBar" value="100" max="100" style="width:100%"></progress><br/>
-  MP: <progress id="mpBar" value="50" max="50" style="width:100%;"></progress><br/>
-  EXP: <progress id="expBar" value="0" max="100" style="width:100%;"></progress><br/>
-  Level: <span id="levelDisplay">1</span> | VIP: <span id="vipDisplay">0</span> | Coins: <span id="coinsDisplay">0</span>
-</div>
+<nav role="navigation" aria-label="Главное меню">
+  <button class="active" data-tab="city">Город</button>
+  <button data-tab="guild">Гильдия</button>
+  <button data-tab="character">Персонаж</button>
+  <button data-tab="journal">Журнал</button>
+</nav>
 
-<div id="inventory" style="max-width:600px; margin: 10px auto; padding:5px; border:1px solid #fff; border-radius:8px; display:flex; overflow-x:auto; background:#222;"></div>
-
-<div id="log" style="max-width:600px; margin:10px auto; padding:10px; height:150px; overflow-y:auto; border:1px solid white; background:#222; text-align:left; font-size:14px;"></div>
-
-<div id="gameControls" style="max-width:600px; margin:10px auto;">
-    <button id="btnDonate" style="padding:10px 20px; font-size:16px; border-radius:8px;">💎 Пополнить счёт</button>
-    <button id="btnSkills" style="padding:10px 20px; font-size:16px; border-radius:8px;">🧙 Древо навыков</button>
-</div>
-
-<!-- Древо навыков -->
-<div id="skillTreeModal" style="display:none; max-width:600px; margin: 10px auto; padding:15px; background:#222; border:1px solid #fff; border-radius:10px;">
-<h2>Древо навыков</h2>
-<div id="skillsList"></div>
-<div>Очки навыков: <span id="skillPoints">0</span></div>
-<button id="closeSkillTree" style="margin-top:10px; padding:8px 15px;">Закрыть</button>
-</div>
+<div id="content-area" aria-live="polite"></div>
 
 <script>
-const gameDiv = document.getElementById('game');
-const invDiv = document.getElementById('inventory');
-const logDiv = document.getElementById('log');
-const hpBar = document.getElementById('hpBar');
-const mpBar = document.getElementById('mpBar');
-const expBar = document.getElementById('expBar');
-const levelDisplay = document.getElementById('levelDisplay');
-const vipDisplay = document.getElementById('vipDisplay');
-const coinsDisplay = document.getElementById('coinsDisplay');
-const skillTreeModal = document.getElementById('skillTreeModal');
-const skillsList = document.getElementById('skillsList');
-const skillPointsSpan = document.getElementById('skillPoints');
+  const tabs = document.querySelectorAll('nav button');
+  const contentArea = document.getElementById('content-area');
+  const goldAmount = document.getElementById('goldAmount');
+  const silverAmount = document.getElementById('silverAmount');
+  const hpBar = document.getElementById('hpBar');
+  const mpBar = document.getElementById('mpBar');
+  const playerName = document.getElementById('playerName');
+  const shopButton = document.getElementById('shopButton');
+  const vipBtn = document.getElementById('vipBtn');
 
-let player = {
-  hp: 100, maxHp: 100,
-  mp: 50, maxMp: 50,
-  exp: 0, nextLevelExp: 100,
-  level:1, coins:0, vipLevel:0,
-  firstTopup: true,
-  inventory: [],
-  equipment: { weapon:null, armor:null, shield:null },
-  skillPoints:0,
-  skills: {strength:0, agility:0, intelligence:0}
-};
+  // Пример данных игрока для демонстрации
+  const playerData = {
+    name: 'kOrEs',
+    level: 5,
+    hp: 190,
+    maxHp: 190,
+    mp: 294,
+    maxMp: 294,
+    gold: 0,
+    silver: 377,
+    vipExpires: true,
+  };
 
-// Персонаж
-const charDiv = document.createElement('div');
-charDiv.className = 'character';
-charDiv.style.left = '270px';
-charDiv.style.top = '180px';
-const charImg = document.createElement('img');
-charImg.src = 'https://opengameart.org/sites/default/files/guy_2_1.png'; // Альтернативный источник
-charImg.alt = 'Персонаж игрока';
-charDiv.appendChild(charImg);
-gameDiv.appendChild(charDiv);
+  function refreshStatus() {
+    playerName.textContent = `${playerData.name} (${playerData.level} ур.)`;
+    hpBar.style.width = (playerData.hp/playerData.maxHp)*100 + '%';
+    hpBar.textContent = `${playerData.hp} / ${playerData.maxHp}`;
+    mpBar.style.width = (playerData.mp/playerData.maxMp)*100 + '%';
+    mpBar.textContent = `${playerData.mp} / ${playerData.maxMp}`;
+    goldAmount.textContent = playerData.gold;
+    silverAmount.textContent = playerData.silver;
 
-// Мобы
-const monstersData = [
-  {id:1, name:'Гоблин', x:180, y:260, img:'https://opengameart.org/sites/default/files/goblin_1.png', hp:30, maxHp:30},
-  {id:2, name:'Скелет', x:320, y:260, img:'https://opengameart.org/sites/default/files/skeleton_1.png', hp:25, maxHp:25}
-];
-const monsterDivs = {};
-monstersData.forEach(monster => {
-  const mDiv = document.createElement('div');
-  mDiv.className = 'monster';
-  mDiv.style.left = monster.x + 'px';
-  mDiv.style.top = monster.y + 'px';
-  mDiv.title = monster.name;
-  const mImg = document.createElement('img');
-  mImg.src = monster.img;
-  mImg.alt = monster.name;
-  mDiv.appendChild(mImg);
-  gameDiv.appendChild(mDiv);
-  monsterDivs[monster.id] = {div: mDiv, data: monster};
-
-  mDiv.addEventListener('click', () => {
-    log(`⚔ Убили моба: ${monster.name}`);
-    const loot = generateLoot();
-    player.inventory.push(loot);
-    log(`🎁 Выпал лут: ${loot.name} (${loot.rarity})`);
-    updateInventory();
-  });
-});
-
-// Лут (ссылки из itch.io c бесплатного набора)
-const lootPool = [
-  {name:"Меч новичка", type:"weapon", img:"https://cdn-icons-png.flaticon.com/512/3102/3102601.png", rarity:"common", bonus:{strength:1}},
-  {name:"Доспех редкий", type:"armor", img:"https://cdn-icons-png.flaticon.com/512/1476/1476600.png", rarity:"rare", bonus:{hp:20}},
-  {name:"Щит эпический", type:"shield", img:"https://cdn-icons-png.flaticon.com/512/925/925292.png", rarity:"epic", bonus:{crit:5}},
-  {name:"Меч легендарный", type:"weapon", img:"https://cdn-icons-png.flaticon.com/512/3544/3544332.png", rarity:"legendary", bonus:{strength:5, crit:10}}
-];
-
-function generateLoot(){
-  const roll = Math.random();
-  if(roll < 0.5) return lootPool[0];
-  if(roll < 0.75) return lootPool[1];
-  if(roll < 0.9) return lootPool[2];
-  return lootPool[3];
-}
-
-// Обновление инвентаря
-function updateInventory(){
-  invDiv.innerHTML = '';
-  player.inventory.forEach((item, idx) => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.style.backgroundImage = `url(${item.img})`;
-    div.title = `${item.name}\n${item.bonus ? JSON.stringify(item.bonus) : ''}`;
-    div.innerHTML = `<span>${item.type}</span>`;
-    div.onclick = () => {
-      player.equipment[item.type] = item;
-      log(`🛡 Экипирован: ${item.name}`);
-      updateStatus();
-    };
-    invDiv.appendChild(div);
-  });
-}
-
-// Обновление статусов
-function updateStatus(){
-  hpBar.value = player.hp;
-  hpBar.max = player.maxHp;
-  mpBar.value = player.mp;
-  mpBar.max = player.maxMp;
-  expBar.value = player.exp;
-  expBar.max = player.nextLevelExp;
-  levelDisplay.textContent = player.level;
-  vipDisplay.textContent = player.vipLevel;
-  coinsDisplay.textContent = player.coins;
-}
-
-// Лог функций
-function log(text){
-  logDiv.innerHTML += text + '<br>';
-  logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-// Донат
-document.getElementById('btnDonate').addEventListener('click', () => {
-  const amount = parseInt(prompt('Введите сумму пополнения (число):'), 10);
-  if(isNaN(amount) || amount <= 0) return alert('Неверная сумма!');
-  player.coins += amount;
-  if(player.firstTopup){
-    player.firstTopup = false;
-    const bonus = lootPool[3];
-    player.inventory.push(bonus);
-    log('🎉 Первое пополнение! Получен бонус: ' + bonus.name);
+    vipBtn.textContent = playerData.vipExpires ? 'VIP: Активен' : 'VIP: Истек';
+    vipBtn.style.backgroundColor = playerData.vipExpires ? '#673ab7' : '#444';
   }
-  const vipInc = Math.floor(amount/100);
-  player.vipLevel += vipInc;
-  player.exp += vipInc * 10;
-  log(`💎 Донат: ${amount} монет, VIP +${vipInc}, EXP +${vipInc * 10}`);
-  updateInventory();
-  updateStatus();
-});
 
-// Навыки
-document.getElementById('btnSkills').addEventListener('click', () => {
-  skillTreeModal.style.display = 'block';
-  renderSkillTree();
-});
-document.getElementById('closeSkillTree').addEventListener('click', () => {
-  skillTreeModal.style.display = 'none';
-});
-function renderSkillTree(){
-  skillsList.innerHTML = '';
-  skillPointsSpan.textContent = player.skillPoints;
-  Object.entries(player.skills).forEach(([key,val]) => {
-    const div = document.createElement('div');
-    div.innerHTML = `${key.toUpperCase()}: ${val} <button data-skill="${key}">+</button>`;
-    div.querySelector('button').addEventListener('click', e => {
-      if(player.skillPoints>0){
-        player.skills[key]++;
-        player.skillPoints--;
-        log(`🆙 ${key.toUpperCase()} +1`);
-        renderSkillTree();
-      }
+  function setActiveTab(tabName) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+    switch(tabName) {
+      case 'city':
+        contentArea.textContent = 'Добро пожаловать в город! Здесь можно начать сражения и посещать строения.';
+        break;
+      case 'guild':
+        contentArea.textContent = 'Здесь расположена ваша Гильдия и задания гильдии.';
+        break;
+      case 'character':
+        contentArea.textContent = `Персонаж по имени ${playerData.name}, уровень ${playerData.level}. Здесь будут характеристики и экипировка.`;
+        break;
+      case 'journal':
+        contentArea.textContent = 'Журнал квестов и событий.';
+        break;
+      default:
+        contentArea.textContent = '';
+    }
+  }
+
+  tabs.forEach(button => {
+    button.addEventListener('click', () => {
+      setActiveTab(button.dataset.tab);
     });
-    skillsList.appendChild(div);
   });
-}
 
-// Запуск
-updateInventory();
-updateStatus();
-log('Добро пожаловать в Mini-RPG! Кликните по мобам, чтобы получить лут.');
+  // Кнопки логика (показываем alert, в реальном проекте будут свои окна)
+  shopButton.addEventListener('click', () => alert('Открыт магазин.'));
+  vipBtn.addEventListener('click', () => alert(playerData.vipExpires ? 'Ваш VIP активен.' : 'Ваш VIP истёк.'));
+  document.getElementById('supportBtn').addEventListener('click', () => alert('Поддержать разработчиков.'));
+  document.getElementById('communityBtn').addEventListener('click', () => alert('Переход в сообщество.'));
+  document.getElementById('invitesBtn').addEventListener('click', () => alert('Показать приглашения.'));
+  document.getElementById('groupBtn').addEventListener('click', () => alert('Управление группой.'));
+  document.getElementById('battlesBtn').addEventListener('click', () => alert('Переход в сражения.'));
+  document.getElementById('buildingsBtn').addEventListener('click', () => alert('Переход к строениям.'));
 
+  // Инициализация интерфейса
+  setActiveTab('city');
+  refreshStatus();
 </script>
 </body>
 </html>
