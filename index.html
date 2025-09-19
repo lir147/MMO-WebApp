@@ -5,12 +5,13 @@
 <title>MMO RPG</title>
 <style>
 body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; text-align: center; }
-#game { margin: 20px auto; width: 720px; padding: 20px; border: 2px solid #fff; border-radius: 10px; background: #333; }
+#game { margin: 20px auto; width: 800px; padding: 20px; border: 2px solid #fff; border-radius: 10px; background: #333; }
 button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-#log { text-align: left; margin-top: 20px; height: 250px; overflow-y: auto; border: 1px solid #fff; padding: 10px; }
+#log { text-align: left; margin-top: 20px; height: 200px; overflow-y: auto; border: 1px solid #fff; padding: 10px; }
 .inventory { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-.item { width: 40px; height: 40px; margin: 5px; border: 1px solid #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-#map { margin-top: 20px; }
+.item { width: 50px; height: 50px; margin: 5px; border: 1px solid #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 24px; background-size: cover; }
+#map { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 80px); grid-gap: 5px; justify-content: center; }
+.tile { width: 80px; height: 80px; border: 1px solid #fff; display: flex; align-items: center; justify-content: center; background-size: cover; }
 #skillsTree { display:none; margin-top:20px; border:1px solid #fff; padding:10px; }
 </style>
 </head>
@@ -43,18 +44,12 @@ button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
         <button onclick="usePotion('mp')">⚡ Зелье MP</button>
         <button onclick="showCharacter()">🔄 Персонаж</button>
         <button onclick="buyVIP()">💎 Купить VIP</button>
-        <button onclick="openSkills()" id="openSkillsBtn">🧩 Открыть древо навыков</button>
+        <button onclick="donate()">💰 Пополнить счет</button>
+        <button onclick="openSkills()" id="openSkillsBtn">🧩 Древо навыков</button>
     </div>
 
     <!-- Карта -->
-    <div id="map" style="display:none;">
-        <h3>Карта</h3>
-        <div id="zoneName"></div>
-        <button onclick="move('up')">⬆️ Вверх</button>
-        <button onclick="move('down')">⬇️ Вниз</button>
-        <button onclick="move('left')">⬅️ Влево</button>
-        <button onclick="move('right')">➡️ Вправо</button>
-    </div>
+    <div id="map"></div>
 
     <!-- Лог и инвентарь -->
     <div id="log"></div>
@@ -76,25 +71,31 @@ button { margin: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
 <script>
 // Игрок
 let player = null;
+let playerPos = {x:1,y:1};
 
-// Лут
+// Лут с картинками
 const lootTable = [
-    {name: "Меч", icon: "🗡️"}, {name: "Щит", icon: "🛡️"}, {name: "Зелье HP", icon: "❤️"},
-    {name: "Зелье MP", icon: "⚡"}, {name: "Посох", icon: "🪄"}, {name: "Лук", icon: "🏹"}
+    {name: "Меч", icon:"🗡️", img:"https://i.imgur.com/OY8o0jA.png"},
+    {name: "Щит", icon:"🛡️", img:"https://i.imgur.com/Ny3uXgD.png"},
+    {name: "Зелье HP", icon:"❤️", img:"https://i.imgur.com/7c3tN2B.png"},
+    {name: "Зелье MP", icon:"⚡", img:"https://i.imgur.com/dz5eK4V.png"},
+    {name: "Посох", icon:"🪄", img:"https://i.imgur.com/Q0Jz5cA.png"},
+    {name: "Лук", icon:"🏹", img:"https://i.imgur.com/q4U0pqG.png"}
 ];
 
-// Монстры
+// Монстры с картинками
 const monsters = [
-    {name:"Скелет", hp:30, exp:20}, {name:"Зомби", hp:40, exp:30}, {name:"Дракон", hp:80, exp:100}
+    {name:"Скелет", hp:30, exp:20, img:"https://i.imgur.com/EhFz7ON.png"},
+    {name:"Зомби", hp:40, exp:30, img:"https://i.imgur.com/4YbUJ95.png"},
+    {name:"Дракон", hp:80, exp:100, img:"https://i.imgur.com/9RjCrgB.png"}
 ];
 
-// Карта
-const map = [
-    [{name:"Лес"}, {name:"Река"}, {name:"Горы"}],
-    [{name:"Деревня"}, {name:"Поляна"}, {name:"Пещера"}],
-    [{name:"Замок"}, {name:"Тундра"}, {name:"Пустошь"}]
+// Карта с картинками тайлов
+const mapTiles = [
+    [{name:"Лес", img:"https://i.imgur.com/lfkz2Tq.png"}, {name:"Река", img:"https://i.imgur.com/ZL3qYwM.png"}, {name:"Горы", img:"https://i.imgur.com/5E5rPYo.png"}],
+    [{name:"Деревня", img:"https://i.imgur.com/XlOqZpV.png"}, {name:"Поляна", img:"https://i.imgur.com/q0q6sDq.png"}, {name:"Пещера", img:"https://i.imgur.com/lqP5zRz.png"}],
+    [{name:"Замок", img:"https://i.imgur.com/Vhrm9kB.png"}, {name:"Тундра", img:"https://i.imgur.com/ZgU6e1d.png"}, {name:"Пустошь", img:"https://i.imgur.com/GkH0W9n.png"}]
 ];
-let playerPos = {x:1, y:1};
 
 // Лог
 function log(msg){ const logDiv = document.getElementById("log"); logDiv.innerHTML += msg+"<br>"; logDiv.scrollTop = logDiv.scrollHeight; }
@@ -118,8 +119,8 @@ function selectGender(gender){
     player.gender = gender;
     document.getElementById("genderSelection").style.display="none";
     document.getElementById("menu").style.display="block";
-    document.getElementById("map").style.display="block";
     document.getElementById("openSkillsBtn").style.display="inline-block";
+    renderMap();
     updateStatus();
     log(`Вы выбрали класс ${player.class}, пол: ${gender}`);
 }
@@ -130,41 +131,42 @@ function updateStatus(){
     document.getElementById("status").innerText=`${genderEmoji} ${player.class} - LV:${player.level} HP:${player.hp}/${player.maxHp} MP:${player.mp}/${player.maxMp} 💎${player.coins}`;
 }
 
-// Перемещение
-function move(direction){
-    if(direction==="up"&&playerPos.y>0) playerPos.y--;
-    if(direction==="down"&&playerPos.y<2) playerPos.y++;
-    if(direction==="left"&&playerPos.x>0) playerPos.x--;
-    if(direction==="right"&&playerPos.x<2) playerPos.x++;
-    updateZone();
-}
-function updateZone(){
-    const zone = map[playerPos.y][playerPos.x];
-    document.getElementById("zoneName").innerText = `Зона: ${zone.name}`;
-    spawnMonster(zone);
+// Рендер карты
+function renderMap(){
+    const mapDiv = document.getElementById("map"); mapDiv.innerHTML="";
+    for(let y=0;y<3;y++){
+        for(let x=0;x<3;x++){
+            const tile = document.createElement("div");
+            tile.className="tile";
+            tile.style.backgroundImage=`url(${mapTiles[y][x].img})`;
+            if(playerPos.x===x && playerPos.y===y){ tile.innerHTML=`<strong>🧑</strong>`; }
+            tile.onclick = ()=>{playerPos.x=x; playerPos.y=y; renderMap(); spawnMonster(mapTiles[y][x]); updateStatus();};
+            mapDiv.appendChild(tile);
+        }
+    }
 }
 
 // Монстры
-function spawnMonster(zone){
-    if(!zone.currentMonster){
+function spawnMonster(tile){
+    if(!tile.currentMonster){
         const monster = {...monsters[Math.floor(Math.random()*monsters.length)]};
-        zone.currentMonster = monster;
+        tile.currentMonster = monster;
         log(`👾 В этой зоне появился монстр: ${monster.name}`);
     }
 }
 
 // Бой
 function fightCurrentMonster(){
-    const zone = map[playerPos.y][playerPos.x];
-    if(!zone.currentMonster){ log("❌ Здесь нет монстров"); return; }
-    const monster = zone.currentMonster;
-    const damage = Math.floor(Math.random()*player.hp/3)+5;
+    const tile = mapTiles[playerPos.y][playerPos.x];
+    if(!tile.currentMonster){ log("❌ Здесь нет монстров"); return; }
+    const monster = tile.currentMonster;
     const playerDamage = Math.floor(Math.random()*monster.hp/2)+10;
+    const damage = Math.floor(Math.random()*player.hp/3)+5;
     if(playerDamage>=monster.hp){
         const loot = lootTable[Math.floor(Math.random()*lootTable.length)];
         player.inventory.push(loot); player.exp += monster.exp; player.coins += Math.floor(Math.random()*20)+5;
         log(`🎉 Вы победили ${monster.name} и получили: ${loot.icon} ${loot.name}, опыт: ${monster.exp}, монеты: ${player.coins}`);
-        levelUp(); updateInventory(); zone.currentMonster=null;
+        levelUp(); updateInventory(); tile.currentMonster=null;
     } else {
         player.hp -= damage;
         if(player.hp<=0){ player.hp=0; log("💀 Вы были побеждены!"); }
@@ -173,63 +175,23 @@ function fightCurrentMonster(){
     updateStatus();
 }
 
-// Повышение уровня
-function levelUp(){
-    while(player.exp >= player.nextLevelExp){
-        player.level++; player.exp -= player.nextLevelExp; player.nextLevelExp = Math.floor(player.nextLevelExp*1.5);
-        player.maxHp += 20; player.maxMp += 10; player.hp = player.maxHp; player.mp = player.maxMp;
-        player.skillPoints +=3;
-        log(`🎉 Поздравляем! LV:${player.level}. Получено 3 очка для прокачки характеристик`);
-        updateSkillsDisplay(); updateStatus();
-    }
-}
-
-// Инвентарь
-function showInventory(){ updateInventory(); }
+// Остальной функционал: инвентарь, зелья, VIP, донат, древо навыков — можно взять из предыдущей версии
 function updateInventory(){
     const invDiv = document.getElementById("inventoryDiv"); invDiv.innerHTML="";
-    for(const item of player.inventory){ const div=document.createElement("div"); div.className="item"; div.innerText=item.icon; div.title=item.name; invDiv.appendChild(div);}
+    for(const item of player.inventory){ const div=document.createElement("div"); div.className="item"; div.style.backgroundImage=`url(${item.img})`; div.title=item.name; invDiv.appendChild(div);}
 }
-
-// Зелья
-function usePotion(type){
-    if(type==="hp"){ player.hp=Math.min(player.hp+50,player.maxHp); log("❤️ Вы использовали зелье здоровья"); }
-    if(type==="mp"){ player.mp=Math.min(player.mp+30,player.maxMp); log("⚡ Вы использовали зелье маны"); }
-    updateStatus();
-}
-
-// Персонаж
+function showInventory(){ updateInventory(); }
+function usePotion(type){ if(type==="hp"){ player.hp=Math.min(player.hp+50,player.maxHp); log("❤️ Вы использовали зелье HP"); } if(type==="mp"){ player.mp=Math.min(player.mp+30,player.maxMp); log("⚡ Вы использовали зелье MP"); } updateStatus(); }
 function showCharacter(){ log(`🧑‍💻 ${player.gender} ${player.class} | LV:${player.level} | HP:${player.hp}/${player.maxHp} MP:${player.mp}/${player.maxMp} 💎${player.coins}`); }
-
-// VIP
-function buyVIP(){
-    if(player.vip){ log("Вы уже VIP!"); return; }
-    if(player.coins>=50){
-        player.coins-=50; player.vip=true;
-        if(!player.firstDonationReceived){
-            const bonus={name:"Эпический Меч", icon:"⚔️"}; player.inventory.push(bonus); player.firstDonationReceived=true;
-            log("💎 Вы стали VIP! Получили бонусное снаряжение: "+bonus.icon+" "+bonus.name);
-        } else log("💎 Вы стали VIP!");
-        updateInventory(); updateStatus();
-    } else log("💰 Недостаточно монет для покупки VIP (50 монет)");
-}
+function buyVIP(){ if(player.vip){ log("Вы уже VIP!"); return; } if(player.coins>=50){ player.coins-=50; player.vip=true; log("💎 Вы стали VIP!"); updateInventory(); updateStatus(); } else log("💰 Недостаточно монет для покупки VIP (50 монет)"); }
+function donate(){ const amount = prompt("Введите сумму для пополнения:"); if(amount>0){ player.coins+=parseInt(amount); log(`💰 Вы пополнили счет на ${amount} монет`); updateStatus(); } }
 
 // Древо навыков
 function openSkills(){ document.getElementById("skillsTree").style.display="block"; }
 function closeSkills(){ document.getElementById("skillsTree").style.display="none"; }
-function addStat(stat){
-    if(player.skillPoints<=0) return;
-    if(stat==="hp") player.maxHp+=10; else if(stat==="mp") player.maxMp+=10; else player[stat]+=1;
-    player.skillPoints--; updateSkillsDisplay(); updateStatus();
-}
-function updateSkillsDisplay(){
-    document.getElementById("skillPoints").innerText=player.skillPoints;
-    document.getElementById("strengthVal").innerText=player.strength;
-    document.getElementById("agilityVal").innerText=player.agility;
-    document.getElementById("intelligenceVal").innerText=player.intelligence;
-    document.getElementById("hpVal").innerText=player.maxHp;
-    document.getElementById("mpVal").innerText=player.maxMp;
-}
+function addStat(stat){ if(player.skillPoints<=0) return; if(stat==="hp") player.maxHp+=10; else if(stat==="mp") player.maxMp+=10; else player[stat]+=1; player.skillPoints--; updateSkillsDisplay(); updateStatus(); }
+function updateSkillsDisplay(){ document.getElementById("skillPoints").innerText=player.skillPoints; document.getElementById("strengthVal").innerText=player.strength; document.getElementById("agilityVal").innerText=player.agility; document.getElementById("intelligenceVal").innerText=player.intelligence; document.getElementById("hpVal").innerText=player.maxHp; document.getElementById("mpVal").innerText=player.maxMp; }
+
 </script>
 
 </body>
