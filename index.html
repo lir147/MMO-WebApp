@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>MMO RPG с анимацией</title>
+<title>MMO RPG с картой и персонажами</title>
 <style>
 body { font-family: Arial; background:#111; color:#fff; text-align:center; }
 #game { margin:20px auto; width:720px; height:600px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; }
@@ -22,7 +22,7 @@ button { margin:5px; padding:8px 12px; }
 </head>
 <body>
 
-<h2>MMO RPG с анимацией</h2>
+<h2>MMO RPG: карта и персонажи</h2>
 <div>
     Класс:
     <button onclick="selectClass('Warrior')">Воин</button>
@@ -62,7 +62,8 @@ for(let y=0;y<3;y++){
     for(let x=0;x<3;x++){
         const tile = document.createElement("div");
         tile.className="tile";
-        tile.style.backgroundImage=`url(https://i.imgur.com/lfkz2Tq.png)`;
+        // Карта тайла (трава)
+        tile.style.backgroundImage=`url('https://i.imgur.com/lfkz2Tq.png')`;
         tile.style.left = x*tileSize+"px";
         tile.style.top = y*tileSize+"px";
         mapDiv.appendChild(tile);
@@ -80,10 +81,14 @@ mapDiv.appendChild(characterDiv);
 function selectClass(cls){ player.class=cls; log(`Вы выбрали класс: ${cls}`); updateCharacterImage(); }
 function selectGender(g){ player.gender=g; log(`Вы выбрали пол: ${g}`); updateCharacterImage(); }
 function updateCharacterImage(){
-    let img='https://i.imgur.com/4c6wqdn.png';
+    let img='https://i.imgur.com/4c6wqdn.png'; // Воин муж
     if(player.class=='Mage') img='https://i.imgur.com/5Uq2KHu.png';
     if(player.class=='Archer') img='https://i.imgur.com/1vTtOkM.png';
-    if(player.gender=='female') img='https://i.imgur.com/3tY7aLp.png';
+    if(player.gender=='female'){
+        if(player.class=='Warrior') img='https://i.imgur.com/3tY7aLp.png';
+        if(player.class=='Mage') img='https://i.imgur.com/ZtFJqP1.png';
+        if(player.class=='Archer') img='https://i.imgur.com/vl4oZT6.png';
+    }
     characterDiv.innerHTML=`<img src="${img}">`;
 }
 
@@ -114,10 +119,10 @@ function moveTo(x,y){
     if(monster){ fight(monster); }
 }
 
-// Бой с критами и спецэффектами
+// Бой с эффектами
 function fight(monster){
     let dmg = player.strength + Math.floor(Math.random()*10);
-    const crit = Math.random()<0.2; // 20% крит
+    const crit = Math.random()<0.2;
     if(crit){ dmg*=2; log("💥 Критический удар!"); showEffect(monster.x,monster.y,"🔥"); }
     else showEffect(monster.x,monster.y,"⚔️");
 
