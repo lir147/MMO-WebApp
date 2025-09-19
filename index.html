@@ -1,164 +1,443 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Mini-RPG Mobile</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-body { font-family: Arial; background:#111; color:#fff; text-align:center; margin:0; padding:0; }
-#game { margin:10px auto; width:95vw; height:50vh; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; background-image: url('https://i.imgur.com/4vXK9pS.png'); background-size: cover; }
-.character, .monster, .loot { width:50px; height:50px; position:absolute; transition:all 0.2s ease; }
-.character img, .monster img, .loot img { width:100%; height:100%; }
-#status { margin:5px; border:1px solid #fff; padding:5px; font-size:14px; text-align:left; }
-.bar { width:100%; height:10px; background:#444; border-radius:5px; margin:2px 0; position:relative; }
-.bar-fill { height:100%; background:#0f0; width:0%; border-radius:5px; }
-#inventory { margin-top:5px; display:flex; justify-content:center; flex-wrap:wrap; }
-.item { width:40px; height:40px; margin:3px; background-size:cover; border:1px solid #fff; border-radius:5px; cursor:pointer; position:relative; }
-.item span { position:absolute; bottom:0; left:0; right:0; background:#0008; font-size:9px; }
-#log { height:80px; overflow-y:auto; border:1px solid #fff; padding:3px; text-align:left; font-size:12px; }
-button { margin:3px; padding:6px 8px; font-size:14px; border-radius:5px; }
-.hidden { display:none; }
-#gameControls { margin-top:5px; }
-#skillTreeModal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background:#222; border:2px solid #fff; padding:15px; z-index:100; width:90%; max-width:300px; max-height:60%; overflow:auto; font-size:14px; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  #game {
+    margin: 10px auto;
+    width: 95vw;
+    height: 50vh;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background: #222 url('https://opengameart.org/sites/default/files/tiny_roguelike_tilesheet.png') no-repeat center center;
+    background-size: contain;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .character,
+  .monster,
+  .loot {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    transition: all 0.2s ease;
+  }
+
+  .character img,
+  .monster img,
+  .loot img {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  #status {
+    margin: 5px auto;
+    width: 95vw;
+    max-width: 600px;
+    border: 1px solid #fff;
+    padding: 8px;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .bar {
+    width: 100%;
+    height: 10px;
+    background: #444;
+    border-radius: 5px;
+    margin: 5px 0;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: #0f0;
+    width: 0%;
+    border-radius: 5px;
+  }
+  #mpFill {
+    background: #06f;
+  }
+  #expFill {
+    background: #ff0;
+  }
+
+  #inventory {
+    margin: 10px auto;
+    width: 95vw;
+    max-width: 600px;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    border: 1px solid #fff;
+    padding: 5px;
+    background: #222;
+    border-radius: 6px;
+    cursor: default;
+  }
+
+  .item {
+    width: 40px;
+    height: 40px;
+    margin: 4px;
+    background-size: cover;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    position: relative;
+  }
+  .item span {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000c;
+    font-size: 9px;
+    color: #eee;
+    user-select: none;
+  }
+  .item:hover {
+    filter: brightness(1.3);
+    cursor: pointer;
+  }
+
+  #log {
+    height: 100px;
+    max-width: 600px;
+    margin: 10px auto;
+    overflow-y: auto;
+    border: 1px solid #fff;
+    padding: 6px;
+    font-size: 13px;
+    text-align: left;
+    background: #222;
+    border-radius: 6px;
+  }
+
+  button {
+    margin: 5px 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    background: #0066cc;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.25s;
+    min-width: 120px;
+  }
+  button:hover {
+    background: #004bb5;
+  }
+
+  #gameControls {
+    margin-top: 10px;
+  }
+
+  #skillTreeModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #222;
+    border: 2px solid #fff;
+    padding: 15px;
+    z-index: 100;
+    width: 90%;
+    max-width: 320px;
+    max-height: 60%;
+    overflow-y: auto;
+    font-size: 14px;
+    display: none;
+  }
+
+  #skillTreeModal.visible {
+    display: block;
+  }
 </style>
 </head>
 <body>
+  <h2>Mini-RPG Mobile</h2>
+  <div id="game"></div>
 
-<h2>Mini-RPG Mobile</h2>
+  <div id="status">
+    HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div>
+    MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div>
+    EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div>
+    Level: <span id="levelDisplay">1</span> |
+    VIP: <span id="vipDisplay">0</span> |
+    Coins: <span id="coinsDisplay">0</span>
+  </div>
 
-<div id="game"></div>
+  <div id="inventory" title="Ваш инвентарь: кликните для экипировки"></div>
 
-<div id="status">
-HP: <div class="bar"><div class="bar-fill" id="hpFill"></div></div>
-MP: <div class="bar"><div class="bar-fill" id="mpFill"></div></div>
-EXP: <div class="bar"><div class="bar-fill" id="expFill"></div></div>
-Level: <span id="levelDisplay">1</span> | VIP: <span id="vipDisplay">0</span> | Coins: <span id="coinsDisplay">0</span>
-</div>
+  <div id="log"></div>
 
-<div id="inventory" title="Инвентарь"></div>
-<div id="log"></div>
+  <div id="gameControls">
+    <button onclick="donate()">💎 Пополнить счёт</button>
+    <button onclick="openSkillTree()">🧙 Древо навыков</button>
+  </div>
 
-<div id="gameControls">
-<button onclick="donate()">💎 Донат / Пополнить</button>
-<button onclick="openSkillTree()">🧙 Древо навыков</button>
-</div>
-
-<div id="skillTreeModal" class="hidden">
-<h3>Древо навыков</h3>
-<div id="skillsList"></div>
-<div>Очки навыков: <span id="skillPoints">0</span></div>
-<button onclick="closeSkillTree()">Закрыть</button>
-</div>
-
+  <div id="skillTreeModal">
+    <h3>Древо навыков</h3>
+    <div id="skillsList"></div>
+    <div>Очки навыков: <span id="skillPoints">0</span></div>
+    <button onclick="closeSkillTree()">Закрыть</button>
+  </div>
 <script>
 // Игрок
 let player = {
-    x:160, y:160, hp:100, maxHp:100, mp:50, maxMp:50,
-    exp:0, nextLevelExp:100, level:1, coins:0, vipLevel:0, firstTopup:true,
-    inventory:[], equipment:{weapon:null, armor:null, shield:null},
-    skillPoints:0, skills:{strength:0, agility:0, intelligence:0}
+  x: 160,
+  y: 160,
+  hp: 100,
+  maxHp: 100,
+  mp: 50,
+  maxMp: 50,
+  exp: 0,
+  nextLevelExp: 100,
+  level: 1,
+  coins: 0,
+  vipLevel: 0,
+  firstTopup: true,
+  inventory: [],
+  equipment: { weapon: null, armor: null, shield: null },
+  skillPoints: 0,
+  skills: { strength: 0, agility: 0, intelligence: 0 }
 };
 
-// Персонаж
+// Элементы
 const mapDiv = document.getElementById("game");
-const charDiv=document.createElement("div"); charDiv.className="character"; mapDiv.appendChild(charDiv);
-const charBase=document.createElement("img"); charBase.src="https://i.imgur.com/4c6wqdn.png"; charDiv.appendChild(charBase);
-const charWeapon=document.createElement("img"); charDiv.appendChild(charWeapon);
-const charArmor=document.createElement("img"); charDiv.appendChild(charArmor);
-const charShield=document.createElement("img"); charDiv.appendChild(charShield);
 
-function log(msg){ const l=document.getElementById("log"); l.innerHTML+=msg+"<br>"; l.scrollTop=l.scrollHeight; }
-function updateStatus(){
-    document.getElementById("hpFill").style.width=(player.hp/player.maxHp*100)+"%";
-    document.getElementById("mpFill").style.width=(player.mp/player.maxMp*100)+"%";
-    document.getElementById("expFill").style.width=(player.exp/player.nextLevelExp*100)+"%";
-    document.getElementById("levelDisplay").innerText=player.level;
-    document.getElementById("vipDisplay").innerText=player.vipLevel;
-    document.getElementById("coinsDisplay").innerText=player.coins;
+// Создаём персонажа
+const charDiv = document.createElement("div");
+charDiv.className = "character";
+mapDiv.appendChild(charDiv);
+
+const charBase = document.createElement("img");
+charBase.src = "https://opengameart.org/sites/default/files/character_maleAdventurer_walk.png"; // пример анимированного или статичного героя
+charDiv.appendChild(charBase);
+
+const charWeapon = document.createElement("img");
+charDiv.appendChild(charWeapon);
+
+const charArmor = document.createElement("img");
+charDiv.appendChild(charArmor);
+
+const charShield = document.createElement("img");
+charDiv.appendChild(charShield);
+
+// Логи
+function log(msg) {
+  const l = document.getElementById("log");
+  l.innerHTML += msg + "<br>";
+  l.scrollTop = l.scrollHeight;
 }
-function updateCharacterView(){
-    charDiv.style.left=player.x+"px"; charDiv.style.top=player.y+"px";
-    charWeapon.src = player.equipment.weapon ? player.equipment.weapon.img : '';
-    charArmor.src = player.equipment.armor ? player.equipment.armor.img : '';
-    charShield.src = player.equipment.shield ? player.equipment.shield.img : '';
+
+// Статус
+function updateStatus() {
+  document.getElementById("hpFill").style.width = (player.hp / player.maxHp) * 100 + "%";
+  document.getElementById("mpFill").style.width = (player.mp / player.maxMp) * 100 + "%";
+  document.getElementById("expFill").style.width = (player.exp / player.nextLevelExp) * 100 + "%";
+  document.getElementById("levelDisplay").innerText = player.level;
+  document.getElementById("vipDisplay").innerText = player.vipLevel;
+  document.getElementById("coinsDisplay").innerText = player.coins;
+}
+
+// Отображение персонажа и экипировки
+function updateCharacterView() {
+  charDiv.style.left = player.x + "px";
+  charDiv.style.top = player.y + "px";
+  charWeapon.src = player.equipment.weapon ? player.equipment.weapon.img : "";
+  charArmor.src = player.equipment.armor ? player.equipment.armor.img : "";
+  charShield.src = player.equipment.shield ? player.equipment.shield.img : "";
 }
 
 // Инвентарь
-const invDiv=document.getElementById("inventory");
-function updateInventory(){
-    invDiv.innerHTML="";
-    player.inventory.forEach((item,idx)=>{
-        const div=document.createElement("div");
-        div.className="item"; div.style.backgroundImage=`url(${item.img})`;
-        div.title=`${item.name}\n${item.bonus?JSON.stringify(item.bonus):''}`;
-        div.innerHTML=`<span>${item.type}</span>`;
-        div.onclick=()=>equipItem(idx);
-        invDiv.appendChild(div);
-    });
+const invDiv = document.getElementById("inventory");
+function updateInventory() {
+  invDiv.innerHTML = "";
+  player.inventory.forEach((item, idx) => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.style.backgroundImage = `url(${item.img})`;
+    div.title = `${item.name}\n${item.bonus ? JSON.stringify(item.bonus) : ""}`;
+    div.innerHTML = `<span>${item.type}</span>`;
+    div.onclick = () => equipItem(idx);
+    invDiv.appendChild(div);
+  });
+}
+function equipItem(index) {
+  const item = player.inventory[index];
+  player.equipment[item.type] = item;
+  log(`🛡 Экипирован: ${item.name}`);
+  updateCharacterView();
 }
 
-function equipItem(index){
-    const item=player.inventory[index];
-    player.equipment[item.type]=item;
-    updateCharacterView();
+// Донат
+function donate() {
+  let amount = parseInt(prompt("Введите сумму пополнения (число):"), 10);
+  if (!amount || amount <= 0) return alert("Неверная сумма!");
+  player.coins += amount;
+
+  if (player.firstTopup) {
+    player.firstTopup = false;
+    // Дарим легендарный меч на первый донат
+    const bonusItem = {
+      name: "Меч новичка+1",
+      type: "weapon",
+      img: "https://opengameart.org/sites/default/files/Gold_Sword_Icon.png",
+      rarity: "legendary",
+      bonus: { strength: 5, crit: 5 }
+    };
+    player.inventory.push(bonusItem);
+    log("🎉 Первое пополнение! Получен бонус: " + bonusItem.name);
+  }
+
+  const vipGain = Math.floor(amount / 100);
+  player.vipLevel += vipGain;
+  player.exp += vipGain * 10; // VIP бонус к опыту
+  log(`💎 Донат: ${amount} монет, VIP +${vipGain}, EXP +${vipGain * 10}`);
+
+  updateInventory();
+  updateStatus();
 }
 
-// Лут с редкостью
-function generateLoot(){
-    const rarityTable=[
-        {name:"Меч новичка", type:"weapon", img:"https://i.imgur.com/OY8o0jA.png", rarity:"common", bonus:{strength:1}},
-        {name:"Доспех редкий", type:"armor", img:"https://i.imgur.com/7c3tN2B.png", rarity:"rare", bonus:{hp:20}},
-        {name:"Щит эпический", type:"shield", img:"https://i.imgur.com/8hG8fXQ.png", rarity:"epic", bonus:{crit:5}},
-        {name:"Меч легендарный", type:"weapon", img:"https://i.imgur.com/ZtFJqP1.png", rarity:"legendary", bonus:{strength:5, crit:10}}
-    ];
-    const roll=Math.random();
-    let item;
-    if(roll<0.5) item=rarityTable[0];
-    else if(roll<0.75) item=rarityTable[1];
-    else if(roll<0.9) item=rarityTable[2];
-    else item=rarityTable[3];
-    player.inventory.push(item);
-    log(`🎁 Выпал лут: ${item.name} (${item.rarity})`);
-    updateInventory();
-}
+// Добавляем мобов на карту
+const monsters = [
+  {
+    id: 1,
+    name: "Гоблин",
+    x: 100,
+    y: 140,
+    hp: 30,
+    maxHp: 30,
+    img: "https://opengameart.org/sites/default/files/goblin_0.png"
+  },
+  {
+    id: 2,
+    name: "Скелет",
+    x: 250,
+    y: 100,
+    hp: 25,
+    maxHp: 25,
+    img: "https://opengameart.org/sites/default/files/skeleton_0.png"
+  }
+];
+const monsterDivs = {};
 
-// Донат с бонусами
-function donate(){
-    let amount=parseInt(prompt("Введите сумму пополнения:"));
-    if(!amount||amount<=0) return;
-    player.coins+=amount;
-    if(player.firstTopup){
-        player.firstTopup=false;
-        const bonusItem={name:"Меч новичка+1", type:"weapon", img:"https://i.imgur.com/OY8o0jA.png", rarity:"legendary", bonus:{strength:5, crit:5}};
-        player.inventory.push(bonusItem);
-        log("🎉 Первое пополнение! Получен бонус: "+bonusItem.name);
+// Рендер мобов
+function renderMonsters() {
+  monsters.forEach(monster => {
+    if (!monsterDivs[monster.id]) {
+      const mDiv = document.createElement("div");
+      mDiv.className = "monster";
+      const img = document.createElement("img");
+      img.src = monster.img;
+      mDiv.appendChild(img);
+      mapDiv.appendChild(mDiv);
+      monsterDivs[monster.id] = mDiv;
+
+      // Клик по мобу — пример лута
+      mDiv.onclick = () => {
+        // Убийство моба (упрощено)
+        log(`⚔ Убили моба: ${monster.name}`);
+        const loot = generateLoot();
+        player.inventory.push(loot);
+        log(`🎁 Выпал лут: ${loot.name} (${loot.rarity})`);
+        updateInventory();
+      };
     }
-    const vipGain=Math.floor(amount/100);
-    player.vipLevel+=vipGain;
-    player.exp+=vipGain*10; // VIP бонус к опыту
-    log(`💎 Донат: ${amount}, VIP +${vipGain}, EXP +${vipGain*10}`);
-    updateInventory(); updateStatus();
+    const mDiv = monsterDivs[monster.id];
+    mDiv.style.left = monster.x + "px";
+    mDiv.style.top = monster.y + "px";
+  });
+}
+
+// Лут с редкостью (картинки с opengameart, kenney)
+function generateLoot() {
+  const rarityTable = [
+    {
+      name: "Меч новичка",
+      type: "weapon",
+      img: "https://opengameart.org/sites/default/files/Sword_Icon.png",
+      rarity: "common",
+      bonus: { strength: 1 }
+    },
+    {
+      name: "Доспех редкий",
+      type: "armor",
+      img: "https://opengameart.org/sites/default/files/Armor_Icon.png",
+      rarity: "rare",
+      bonus: { hp: 20 }
+    },
+    {
+      name: "Щит эпический",
+      type: "shield",
+      img: "https://opengameart.org/sites/default/files/shield_0.png",
+      rarity: "epic",
+      bonus: { crit: 5 }
+    },
+    {
+      name: "Меч легендарный",
+      type: "weapon",
+      img: "https://opengameart.org/sites/default/files/Golden_Sword_Icon.png",
+      rarity: "legendary",
+      bonus: { strength: 5, crit: 10 }
+    }
+  ];
+  const roll = Math.random();
+  let item;
+  if (roll < 0.5) item = rarityTable[0];
+  else if (roll < 0.75) item = rarityTable[1];
+  else if (roll < 0.9) item = rarityTable[2];
+  else item = rarityTable[3];
+  return item;
 }
 
 // Навыки
-function openSkillTree(){ document.getElementById("skillTreeModal").classList.remove("hidden"); updateSkillTree(); }
-function closeSkillTree(){ document.getElementById("skillTreeModal").classList.add("hidden"); }
-function updateSkillTree(){
-    const skillsDiv=document.getElementById("skillsList"); skillsDiv.innerHTML="";
-    document.getElementById("skillPoints").innerText=player.skillPoints;
-    for(let key in player.skills){
-        let div=document.createElement("div");
-        div.innerHTML=`${key.toUpperCase()}: ${player.skills[key]} <button onclick="upgradeSkill('${key}')">+</button>`;
-        skillsDiv.appendChild(div);
-    }
+function openSkillTree() {
+  const modal = document.getElementById("skillTreeModal");
+  modal.classList.add("visible");
+  updateSkillTree();
 }
-function upgradeSkill(skill){ if(player.skillPoints<=0) return; player.skills[skill]+=1; player.skillPoints-=1; log(`🆙 ${skill.toUpperCase()} +1`); updateSkillTree(); }
+function closeSkillTree() {
+  const modal = document.getElementById("skillTreeModal");
+  modal.classList.remove("visible");
+}
 
-// Тестовые кнопки
-setInterval(generateLoot, 10000); // каждые 10 секунд лут падает
-updateCharacterView(); updateInventory(); updateStatus();
+function updateSkillTree() {
+  const skillsDiv = document.getElementById("skillsList");
+  skillsDiv.innerHTML = "";
+  document.getElementById("skillPoints").innerText = player.skillPoints;
+  for (let key in player.skills) {
+    let div = document.createElement("div");
+    div.innerHTML = `${key.toUpperCase()}: ${player.skills[key]} <button onclick="upgradeSkill('${key}')">+</button>`;
+    skillsDiv.appendChild(div);
+  }
+}
+function upgradeSkill(skill) {
+  if (player.skillPoints <= 0) return;
+  player.skills[skill] += 1;
+  player.skillPoints -= 1;
+  log(`🆙 ${skill.toUpperCase()} +1`);
+  updateSkillTree();
+}
+
+// Инициализация
+updateCharacterView();
+updateInventory();
+updateStatus();
+renderMonsters();
 </script>
-
 </body>
 </html>
