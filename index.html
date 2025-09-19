@@ -2,15 +2,17 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>MMO RPG</title>
+<title>MMO RPG с анимацией</title>
 <style>
 body { font-family: Arial; background:#111; color:#fff; text-align:center; }
 #game { margin:20px auto; width:720px; height:600px; border:2px solid #fff; border-radius:10px; background:#222; position:relative; overflow:hidden; }
 .tile { width:80px; height:80px; float:left; border:1px solid #444; background-size:cover; position:relative; }
-.character, .monster, .loot { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
-.character img, .monster img, .loot img { width:100%; height:100%; }
+.character, .monster, .loot, .effect { width:60px; height:60px; position:absolute; transition:all 0.3s ease; }
+.character img, .monster img, .loot img, .effect img { width:100%; height:100%; }
 .damage { position:absolute; font-weight:bold; color:red; animation:up 1s forwards; }
 @keyframes up { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-40px); } }
+.effectAnim { animation:effectAnim 0.5s forwards; }
+@keyframes effectAnim { 0% {opacity:1; transform:scale(0.5);} 100% {opacity:0; transform:scale(1.5);} }
 #log { clear:both; text-align:left; height:120px; overflow-y:auto; margin-top:10px; border:1px solid #fff; padding:5px; }
 .item { width:50px; height:50px; margin:5px; display:inline-block; background-size:cover; border:1px solid #fff; border-radius:5px; cursor:pointer; }
 button { margin:5px; padding:8px 12px; }
@@ -20,9 +22,9 @@ button { margin:5px; padding:8px 12px; }
 </head>
 <body>
 
-<h2>MMO RPG Анимация боя</h2>
+<h2>MMO RPG с анимацией</h2>
 <div>
-    Выберите класс:
+    Класс:
     <button onclick="selectClass('Warrior')">Воин</button>
     <button onclick="selectClass('Mage')">Маг</button>
     <button onclick="selectClass('Archer')">Лучник</button>
@@ -34,7 +36,6 @@ button { margin:5px; padding:8px 12px; }
 </div>
 
 <div id="game"></div>
-
 <div>
     <button onclick="buyVIP()">💎 VIP</button>
     <button onclick="donate()">💰 Пополнить счет</button>
@@ -44,6 +45,7 @@ button { margin:5px; padding:8px 12px; }
 <div id="skills"></div>
 
 <script>
+// Игрок
 let player = {x:1,y:1,hp:100,maxHp:100,mp:50,maxMp:50,strength:10,agility:10,intelligence:10,inventory:[],level:1,exp:0,nextLevelExp:100,coins:0,vip:false,skillPoints:0,class:'',gender:''};
 let monsters = [];
 let lootTable = [
@@ -103,7 +105,7 @@ function spawnMonster(x,y,hp=50,img="https://i.imgur.com/EhFz7ON.png"){
 spawnMonster(0,0);
 spawnMonster(2,2);
 
-// Динамическое движение
+// Перемещение
 function moveTo(x,y){
     characterDiv.style.left=x*tileSize+10+"px";
     characterDiv.style.top=y*tileSize+10+"px";
@@ -112,18 +114,22 @@ function moveTo(x,y){
     if(monster){ fight(monster); }
 }
 
-// Бой
+// Бой с критами и спецэффектами
 function fight(monster){
-    log(`⚔️ Бой с монстром!`);
-    const dmgDiv = document.createElement("div");
+    let dmg = player.strength + Math.floor(Math.random()*10);
+    const crit = Math.random()<0.2; // 20% крит
+    if(crit){ dmg*=2; log("💥 Критический удар!"); showEffect(monster.x,monster.y,"🔥"); }
+    else showEffect(monster.x,monster.y,"⚔️");
+
+    monster.hp-=dmg;
+    const dmgDiv=document.createElement("div");
     dmgDiv.className="damage";
-    const dmg = player.strength+Math.floor(Math.random()*10);
     dmgDiv.innerText=dmg;
     dmgDiv.style.left=monster.x*tileSize+20+"px";
     dmgDiv.style.top=monster.y*tileSize+"px";
     mapDiv.appendChild(dmgDiv);
     setTimeout(()=>{ dmgDiv.remove(); },1000);
-    monster.hp-=dmg;
+
     if(monster.hp<=0){
         log(`💀 Монстр побежден!`);
         monster.div.remove();
@@ -134,29 +140,26 @@ function fight(monster){
     }
 }
 
-// Уровень
-function levelUp(){
-    player.level++;
-    player.exp=player.exp-player.nextLevelExp;
-    player.nextLevelExp+=50;
-    player.skillPoints+=5;
-    log(`🔝 Уровень повышен! У вас ${player.skillPoints} очков навыков`);
+// Эффекты
+function showEffect(x,y,symbol){
+    const eDiv=document.createElement("div");
+    eDiv.className="effect";
+    eDiv.innerHTML=`<div class="effectAnim">${symbol}</div>`;
+    eDiv.style.left=x*tileSize+20+"px";
+    eDiv.style.top=y*tileSize+10+"px";
+    mapDiv.appendChild(eDiv);
+    setTimeout(()=>{ eDiv.remove(); },500);
 }
 
 // Лут
 function dropLoot(x,y){
     const loot = lootTable[Math.floor(Math.random()*lootTable.length)];
-    const lDiv = document.createElement("div");
+    const lDiv=document.createElement("div");
     lDiv.className="loot";
     lDiv.style.left=x*tileSize+10+"px";
     lDiv.style.top=y*tileSize+10+"px";
     lDiv.innerHTML=`<img src="${loot.img}">`;
-    lDiv.onclick=()=>{
-        player.inventory.push(loot);
-        updateInventory();
-        lDiv.remove();
-        log(`Вы получили: ${loot.name}`);
-    }
+    lDiv.onclick=()=>{ player.inventory.push(loot); updateInventory(); lDiv.remove(); log(`Вы получили: ${loot.name}`); }
     mapDiv.appendChild(lDiv);
 }
 function updateInventory(){
@@ -193,6 +196,16 @@ function renderSkills(){
     });
 }
 renderSkills();
+
+// Уровень
+function levelUp(){
+    player.level++;
+    player.exp=player.exp-player.nextLevelExp;
+    player.nextLevelExp+=50;
+    player.skillPoints+=5;
+    log(`🔝 Уровень повышен! У вас ${player.skillPoints} очков навыков`);
+    renderSkills();
+}
 
 // VIP и донат
 function buyVIP(){ if(player.vip){ log("Вы уже VIP!"); return; } if(player.coins>=50){ player.coins-=50; player.vip=true; log("💎 Вы стали VIP!"); } else log("💰 Недостаточно монет для VIP (50)"); }
