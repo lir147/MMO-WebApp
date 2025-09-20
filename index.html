@@ -3,50 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPG Персонаж</title>
+<title>RPG Telegram WebApp</title>
 <style>
 :root {
-    --dark-bg: #0f172a;
-    --panel-bg: #1e293b;
-    --accent: #3b82f6;
-    --accent-dark: #2563eb;
-    --text: #f1f5f9;
-    --text-muted: #94a3b8;
-    --health: #ef4444;
-    --mana: #6366f1;
-    --xp: #10b981;
-    --gold: #f59e0b;
+    --dark-bg:#0f172a;--panel-bg:#1e293b;--accent:#3b82f6;--accent-dark:#2563eb;--text:#f1f5f9;--text-muted:#94a3b8;--health:#ef4444;--mana:#6366f1;--xp:#10b981;--strength:#f59e0b;--agility:#10b981;--vitality:#ef4444;--intellect:#3b82f6;--locked:#475569;--gold:#f59e0b;--success:#10b981;--danger:#ef4444;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-body{background:var(--dark-bg);color:var(--text);min-height:100vh;padding:20px;}
-.container{max-width:1200px;margin:0 auto;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:20px;background:var(--panel-bg);border-radius:12px;}
+body{background:var(--dark-bg);color:var(--text);min-height:100vh;}
+.container{max-width:1200px;margin:0 auto;padding:10px;}
+header{display:flex;justify-content:space-between;align-items:center;background:var(--panel-bg);padding:15px;border-radius:12px;margin-bottom:20px;}
 .character-info{display:flex;align-items:center;gap:15px;}
-.character-visual{position:relative;width:80px;height:80px;background:rgba(30,41,59,0.7);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.character-visual{position:relative;width:80px;height:80px;background:rgba(30,41,59,0.7);border-radius:8px;display:flex;align-items:center;justify-content:center;}
 .character-base{width:50px;height:50px;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23f59e0b"/></svg>');background-size:contain;background-repeat:no-repeat;}
-.character-weapon,.character-armor{position:absolute;font-size:2rem;transition:all 0.5s ease;}
-.character-weapon{top:25px;left:45px;opacity:0;transform:scale(0);}
-.character-armor{top:20px;left:30px;opacity:0;transform:scale(0);}
-.header-text h1{font-size:1.5rem;margin-bottom:5px;color:var(--accent);}
+.character-weapon,.character-armor{position:absolute;background-size:contain;background-repeat:no-repeat;}
+.character-weapon{width:30px;height:30px;top:25px;left:45px;}
+.character-armor{width:40px;height:40px;top:20px;left:30px;}
+.header-text h1{color:var(--accent);font-size:1.5rem;margin-bottom:5px;}
 .header-text div{color:var(--text-muted);}
-.gold-display{display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:bold;color:var(--gold);}
+.gold-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:var(--gold);}
 .tabs{display:flex;margin-bottom:20px;background:var(--panel-bg);border-radius:12px;overflow:hidden;}
-.tab-btn{flex:1;padding:15px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.3s;font-weight:bold;}
+.tab-btn{flex:1;padding:12px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-weight:bold;transition:0.3s;}
 .tab-btn:hover{background:rgba(59,130,246,0.1);color:var(--text);}
-.tab-btn.active{background:var(--accent);color:white;}
+.tab-btn.active{background:var(--accent);color:#fff;}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
-.inventory-panel{background:var(--panel-bg);padding:20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.inventory-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
-.item-slot{background:rgba(30,41,59,0.7);height:70px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #334155;transition:all 0.3s;position:relative;cursor:pointer;}
+.character-creation{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px;}
+.creation-panel{background:var(--panel-bg);padding:20px;border-radius:12px;}
+.creation-panel h2{margin-bottom:20px;color:var(--accent);}
+.nickname-input input{width:100%;padding:10px;border-radius:8px;background:rgba(30,41,59,0.7);border:2px solid #334155;color:var(--text);}
+.class-grid,.gender-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:20px;}
+.class-option,.gender-option{background:rgba(30,41,59,0.7);padding:15px;border:2px solid #334155;border-radius:8px;text-align:center;cursor:pointer;transition:0.3s;}
+.class-option.selected,.gender-option.selected{border-color:var(--accent);background:rgba(59,130,246,0.2);}
+.character-preview{margin-top:20px;padding-top:20px;border-top:1px solid #334155;}
+.character-preview h3{color:var(--accent);margin-bottom:15px;}
+#character-avatar{font-size:3rem;}
+.character-sheet{display:grid;grid-template-columns:300px 1fr;gap:20px;}
+.stats-panel{background:var(--panel-bg);padding:20px;border-radius:12px;}
+.character-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;border-bottom:1px solid #334155;padding-bottom:15px;}
+#stats-avatar{font-size:3rem;position:relative;}
+.equipment-slots{position:absolute;font-size:0.8rem;background:rgba(0,0,0,0.7);border-radius:4px;padding:2px 5px;}
+.resource-bar{margin-bottom:15px;}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:5px;}
+.bar{height:20px;background:#334155;border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:10px;transition:width 0.3s;}
+.health .bar-fill{background:var(--health);}
+.mana .bar-fill{background:var(--mana);}
+.xp .bar-fill{background:var(--xp);}
+.attributes{margin-top:20px;}
+.attribute{display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #334155;}
+.upgrade-btn{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:0.8rem;transition:0.2s;}
+.upgrade-btn:hover{background:var(--accent-dark);}
+.upgrade-btn:disabled{background:var(--locked);cursor:not-allowed;}
+.combat-stats{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px;}
+.stat-item{background:rgba(30,41,59,0.7);padding:12px;border-radius:8px;text-align:center;}
+.stat-value{color:var(--accent);font-weight:bold;}
+.inventory-panel{background:var(--panel-bg);padding:20px;border-radius:12px;margin-top:20px;}
+.inventory-header{display:flex;justify-content:space-between;align-items:center;}
+.inventory-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:15px;}
+.item-slot{background:rgba(30,41,59,0.7);height:70px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #334155;position:relative;cursor:pointer;transition:0.3s;}
 .item-slot.empty::before{content:"+";font-size:1.5rem;color:var(--text-muted);}
-.item-slot:hover{border-color:var(--accent);}
-.item-icon{font-size:2rem;cursor:grab;}
-.item-count{position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.7);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
+.item-slot.equipped{border-color:var(--accent);box-shadow:0 0 10px rgba(59,130,246,0.5);}
 .item-context-menu{position:absolute;background:var(--panel-bg);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:100;padding:10px;display:none;flex-direction:column;gap:5px;}
-.item-context-btn{padding:8px 12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;text-align:left;}
-.item-context-btn.sell{background:green;}
-.item-context-btn.dismantle{background:red;}
+.item-context-btn{padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:left;}
+.item-context-btn.sell{background:var(--success);}
+.item-context-btn.dismantle{background:var(--danger);}
+.skills-container{background:var(--panel-bg);padding:20px;border-radius:12px;}
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:15px;}
+.skill-card{background:rgba(30,41,59,0.7);padding:15px;border-radius:8px;text-align:center;transition:0.3s;cursor:pointer;position:relative;}
+.skill-card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.3);}
+.skill-level{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;border-radius:50%;width:25px;height:25px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:bold;}
+.skill-upgrade{margin-top:10px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:5px 10px;cursor:pointer;font-size:0.8rem;}
+.skill-upgrade:disabled{background:var(--locked);cursor:not-allowed;}
+.tavern-panel{background:var(--panel-bg);padding:20px;border-radius:12px;}
+.tavern-tabs{display:flex;margin-bottom:20px;background:rgba(30,41,59,0.7);border-radius:8px;overflow:hidden;}
+.tavern-tab{flex:1;padding:12px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;transition:0.3s;}
+.tavern-tab.active{background:var(--accent);color:#fff;}
+.tavern-content{display:none;}
+.tavern-content.active{display:block;}
+.start-button{display:block;width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:1.2rem;font-weight:bold;cursor:pointer;margin-top:20px;}
+.start-button:hover{background:var(--accent-dark);}
+.level-up-notification{position:fixed;top:20px;right:20px;background:var(--accent);color:#fff;padding:15px 20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.3);z-index:1000;display:flex;align-items:center;gap:10px;transform:translateX(100%);transition:transform 0.5s;}
+.level-up-notification.show{transform:translateX(0);}
+@media(max-width:900px){.character-creation{grid-template-columns:1fr;}.character-sheet{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -59,179 +97,245 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 <div class="character-armor" id="character-armor"></div>
 </div>
 <div class="header-text">
-<h1 id="header-name">Игрок</h1>
+<h1 id="header-name">Воин</h1>
 <div id="header-level">Уровень 1</div>
 </div>
 </div>
-<div class="gold-display">
-<span>🪙</span>
-<span id="gold-amount">50</span>
-</div>
+<div class="gold-display"><span>🪙</span><span id="gold-amount">50</span></div>
 </header>
 
 <div class="tabs">
-<button class="tab-btn active" data-tab="inventory">Инвентарь</button>
+<button class="tab-btn active" data-tab="creation">Создание</button>
 <button class="tab-btn" data-tab="stats">Характеристики</button>
+<button class="tab-btn" data-tab="skills">Умения</button>
+<button class="tab-btn" data-tab="tavern">Таверна</button>
+<button class="tab-btn" data-tab="location">Локации</button>
 </div>
 
-<div class="tab-content active" id="inventory">
-<div class="inventory-panel">
-<div class="inventory-grid" id="inventory-grid"></div>
+<div class="tab-content active" id="creation">
+<!-- Панель создания персонажа -->
+<div class="character-creation">
+<div class="creation-panel">
+<h2>Выбор класса</h2>
+<div class="nickname-input">
+<label for="nickname">Имя персонажа:</label>
+<input type="text" id="nickname" placeholder="Введите имя">
+</div>
+<div class="class-grid">
+<div class="class-option selected" data-class="warrior">
+<div class="class-icon">⚔️</div>
+<div class="class-name">Воин</div>
+<div class="class-desc">Сильный боец ближнего боя</div>
+</div>
+<div class="class-option" data-class="mage">
+<div class="class-icon">🧙</div>
+<div class="class-name">Маг</div>
+<div class="class-desc">Мощные заклинания</div>
+</div>
+<div class="class-option" data-class="archer">
+<div class="class-icon">🏹</div>
+<div class="class-name">Лучник</div>
+<div class="class-desc">Точные выстрелы на расстоянии</div>
+</div>
+<div class="class-option" data-class="rogue">
+<div class="class-icon">🗡️</div>
+<div class="class-name">Разбойник</div>
+<div class="class-desc">Скрытность и атаки из тени</div>
+</div>
+</div>
+</div>
+
+<div class="creation-panel">
+<h2>Выбор пола</h2>
+<div class="gender-grid">
+<div class="gender-option selected" data-gender="male">
+<div class="class-icon">👨</div>
+<div class="class-name">Мужской</div>
+</div>
+<div class="gender-option" data-gender="female">
+<div class="class-icon">👩</div>
+<div class="class-name">Женский</div>
+</div>
+</div>
+
+<div class="character-preview">
+<h3>Предпросмотр</h3>
+<div class="preview-content">
+<div id="character-avatar">⚔️</div>
+<div id="character-info">
+<div id="character-name">Воин</div>
+<div id="character-level">Уровень 1</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 
 <div class="tab-content" id="stats">
+<!-- Панель характеристик -->
+<div class="character-sheet">
+<div class="stats-panel">
 <h2>Характеристики</h2>
-<p>Здесь будут характеристики персонажа.</p>
+<div class="character-header">
+<div id="stats-avatar">⚔️<div class="equipment-slots" id="weapon-slot"></div><div class="equipment-slots" id="armor-slot"></div></div>
+<div><div id="stats-name">Воин</div><div id="stats-class">Уровень 1</div></div>
+</div>
+<div class="resource-bar health">
+<div class="bar-label"><span>Здоровье</span><span id="health-value">100/100</span></div>
+<div class="bar"><div class="bar-fill" id="health-bar" style="width:100%"></div></div>
+</div>
+<div class="resource-bar mana">
+<div class="bar-label"><span>Мана</span><span id="mana-value">50/50</span></div>
+<div class="bar"><div class="bar-fill" id="mana-bar" style="width:100%"></div></div>
+</div>
+<div class="resource-bar xp">
+<div class="bar-label"><span>Опыт</span><span id="xp-value">0/100</span></div>
+<div class="bar"><div class="bar-fill" id="xp-bar" style="width:0%"></div></div>
+</div>
+<div class="attributes">
+<div class="attribute">Сила <span id="strength-value">10</span><button class="upgrade-btn" id="upgrade-strength">+</button></div>
+<div class="attribute">Ловкость <span id="agility-value">10</span><button class="upgrade-btn" id="upgrade-agility">+</button></div>
+<div class="attribute">Выносливость <span id="vitality-value">10</span><button class="upgrade-btn" id="upgrade-vitality">+</button></div>
+<div class="attribute">Интеллект <span id="intellect-value">10</span><button class="upgrade-btn" id="upgrade-intellect">+</button></div>
+</div>
+<div class="combat-stats">
+<div class="stat-item">Атака <div class="stat-value" id="attack-value">15</div></div>
+<div class="stat-item">Защита <div class="stat-value" id="defense-value">10</div></div>
+<div class="stat-item">Скорость <div class="stat-value" id="speed-value">8</div></div>
+<div class="stat-item">Крит <div class="stat-value" id="crit-value">5%</div></div>
+</div>
+</div>
+<div class="inventory-panel">
+<div class="inventory-header"><h2>Инвентарь</h2><button class="start-button" id="send-to-bot">Отправить боту</button></div>
+<div class="inventory-grid" id="inventory-grid">
+<!-- Слоты инвентаря -->
+</div>
+</div>
 </div>
 </div>
 
-<div class="item-context-menu" id="item-context-menu">
-<button class="item-context-btn equip">Экипировать</button>
-<button class="item-context-btn sell">Продать</button>
-<button class="item-context-btn dismantle">Разобрать</button>
+<div class="tab-content" id="skills">
+<div class="skills-container">
+<h2>Умения</h2>
+<div class="skills-grid" id="skills-grid">
+<!-- Скилы -->
 </div>
+</div>
+</div>
+
+<div class="tab-content" id="tavern">
+<div class="tavern-panel">
+<h2>Таверна</h2>
+<div class="tavern-tabs">
+<button class="tavern-tab active" data-tab="quests">Квесты</button>
+<button class="tavern-tab" data-tab="shop">Магазин</button>
+<button class="tavern-tab" data-tab="npc">NPC</button>
+</div>
+<div class="tavern-content active" id="quests">Список квестов...</div>
+<div class="tavern-content" id="shop">Магазин предметов...</div>
+<div class="tavern-content" id="npc">Диалоги с NPC...</div>
+</div>
+</div>
+
+<div class="tab-content" id="location">
+<div class="tavern-panel">
+<h2>Локации</h2>
+<div class="tavern-content active" id="locations">Выбор локации для похода...</div>
+</div>
+</div>
+</div>
+
+<div class="level-up-notification" id="level-up">🎉 Вы повысили уровень!</div>
 
 <script>
-let character = {
-    name: "Игрок",
-    level: 1,
-    gold: 50,
-    equipment: {weapon: null, armor: null},
-    inventory: [
-        {name:"Меч",type:"weapon",icon:"🗡️",count:1},
-        {name:"Щит",type:"armor",icon:"🛡️",count:1},
-        {name:"Зелье",type:"consumable",icon:"🧪",count:3},
-        null,null,null,null,null,null
-    ]
-};
-
-// Табсы
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
         document.getElementById(btn.dataset.tab).classList.add('active');
     });
 });
 
-const inventoryGrid = document.getElementById('inventory-grid');
-const contextMenu = document.getElementById('item-context-menu');
-let currentSlot = null;
-
-function renderInventory(){
-    inventoryGrid.innerHTML = '';
-    character.inventory.forEach((item,index)=>{
-        const slot = document.createElement('div');
-        slot.classList.add('item-slot');
-        slot.dataset.index = index;
-
-        if(item){
-            const icon = document.createElement('div');
-            icon.className = 'item-icon';
-            icon.textContent = item.icon;
-            icon.draggable = true;
-
-            // Drag&Drop
-            icon.addEventListener('dragstart', e=>{
-                e.dataTransfer.setData('text/plain', index);
-            });
-
-            slot.appendChild(icon);
-
-            if(item.count>1){
-                const count = document.createElement('div');
-                count.className = 'item-count';
-                count.textContent = item.count;
-                slot.appendChild(count);
-            }
-        } else slot.classList.add('empty');
-
-        slot.addEventListener('dragover', e=>{e.preventDefault();});
-        slot.addEventListener('drop', e=>{
-            const fromIndex = e.dataTransfer.getData('text/plain');
-            [character.inventory[fromIndex], character.inventory[index]] = [character.inventory[index], character.inventory[fromIndex]];
-            renderInventory();
-        });
-
-        slot.addEventListener('contextmenu',(e)=>{
-            e.preventDefault();
-            currentSlot = index;
-            contextMenu.style.display='flex';
-            contextMenu.style.left=e.pageX+'px';
-            contextMenu.style.top=e.pageY+'px';
-        });
-
-        inventoryGrid.appendChild(slot);
+// Tavern tabs
+document.querySelectorAll('.tavern-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tavern-tab').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tavern-content').forEach(tc=>tc.classList.remove('active'));
+        document.getElementById(btn.dataset.tab).classList.add('active');
     });
-}
-
-// Экипировка с анимацией
-function equipItem(item,index){
-    if(item.type==='weapon'){
-        if(character.equipment.weapon) character.inventory[index] = character.equipment.weapon;
-        else character.inventory[index] = null;
-        character.equipment.weapon = item;
-
-        const weaponEl = document.getElementById('character-weapon');
-        weaponEl.textContent = item.icon;
-        weaponEl.style.opacity = 0;
-        weaponEl.style.transform = 'scale(0)';
-        setTimeout(()=>{
-            weaponEl.style.opacity = 1;
-            weaponEl.style.transform = 'scale(1)';
-        },50);
-    }
-    if(item.type==='armor'){
-        if(character.equipment.armor) character.inventory[index] = character.equipment.armor;
-        else character.inventory[index] = null;
-        character.equipment.armor = item;
-
-        const armorEl = document.getElementById('character-armor');
-        armorEl.textContent = item.icon;
-        armorEl.style.opacity = 0;
-        armorEl.style.transform = 'scale(0)';
-        setTimeout(()=>{
-            armorEl.style.opacity = 1;
-            armorEl.style.transform = 'scale(1)';
-        },50);
-    }
-}
-
-contextMenu.querySelector('.equip').addEventListener('click',()=>{
-    if(currentSlot===null) return;
-    const item = character.inventory[currentSlot];
-    if(!item) return;
-    equipItem(item,currentSlot);
-    renderInventory();
-    contextMenu.style.display='none';
 });
 
-contextMenu.querySelector('.sell').addEventListener('click',()=>{
-    if(currentSlot===null) return;
-    const item = character.inventory[currentSlot];
-    if(!item) return;
-    character.gold += 10;
-    character.inventory[currentSlot] = null;
+// Character creation
+let character = {
+    name:"Воин",
+    class:"warrior",
+    gender:"male",
+    level:1,
+    health:100,
+    mana:50,
+    xp:0,
+    strength:10,
+    agility:10,
+    vitality:10,
+    intellect:10,
+    gold:50,
+    inventory:[]
+};
+
+function updatePreview(){
+    document.getElementById('character-avatar').textContent = character.class=="warrior"?"⚔️":character.class=="mage"?"🧙":character.class=="archer"?"🏹":"🗡️";
+    document.getElementById('character-name').textContent = character.name;
+    document.getElementById('character-level').textContent = "Уровень "+character.level;
+    document.getElementById('header-name').textContent = character.name;
+    document.getElementById('header-level').textContent = "Уровень "+character.level;
     document.getElementById('gold-amount').textContent = character.gold;
-    renderInventory();
-    contextMenu.style.display='none';
+}
+updatePreview();
+
+document.getElementById('nickname').addEventListener('input',(e)=>{
+    character.name = e.target.value || "Воин";
+    updatePreview();
 });
 
-contextMenu.querySelector('.dismantle').addEventListener('click',()=>{
-    if(currentSlot===null) return;
-    const item = character.inventory[currentSlot];
-    if(!item) return;
-    character.inventory[currentSlot] = null;
-    renderInventory();
-    contextMenu.style.display='none';
+document.querySelectorAll('.class-option').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.querySelectorAll('.class-option').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        character.class = btn.dataset.class;
+        updatePreview();
+    });
 });
 
-// Закрытие меню при клике вне
-document.addEventListener('click',()=>{contextMenu.style.display='none';});
+document.querySelectorAll('.gender-option').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.querySelectorAll('.gender-option').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        character.gender = btn.dataset.gender;
+        updatePreview();
+    });
+});
 
-renderInventory();
+// Upgrade stats
+['strength','agility','vitality','intellect'].forEach(stat=>{
+    document.getElementById(`upgrade-${stat}`).addEventListener('click',()=>{
+        character[stat]++;
+        document.getElementById(`${stat}-value`).textContent = character[stat];
+    });
+});
+
+// Send to Telegram bot
+document.getElementById('send-to-bot').addEventListener('click',()=>{
+    if(window.Telegram.WebApp){
+        window.Telegram.WebApp.sendData(JSON.stringify(character));
+        alert("Данные отправлены боту!");
+    }else{
+        alert("Это работает только в Telegram Web App.");
+    }
+});
 </script>
 </body>
 </html>
