@@ -3,382 +3,285 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini RPG</title>
+<title>Telegram RPG</title>
 <style>
 :root {
-    --bg: #0f172a;
-    --panel: #1e293b;
+    --dark-bg: #0f172a;
+    --panel-bg: #1e293b;
     --accent: #3b82f6;
+    --accent-dark: #2563eb;
     --text: #f1f5f9;
     --text-muted: #94a3b8;
     --health: #ef4444;
     --mana: #6366f1;
     --xp: #10b981;
     --gold: #f59e0b;
+    --locked: #475569;
 }
-body{margin:0;font-family:'Segoe UI',sans-serif;background: var(--bg);color: var(--text);}
-.container{max-width:1200px;margin:auto;padding:20px;}
-header{display:flex;justify-content:space-between;align-items:center;background:var(--panel);padding:15px;border-radius:10px;}
-.character-info{display:flex;align-items:center;gap:15px;}
-.character-visual{position:relative;width:80px;height:80px;background: rgba(30,41,59,0.7);border-radius:8px;display:flex;justify-content:center;align-items:center;font-size:3rem;}
-.equipment-slot{position:absolute;font-size:1.5rem;}
-#weapon-slot{top:0; right:-5px;}
-#armor-slot{bottom:0; right:-5px;}
-.tabs{display:flex;gap:5px;margin:20px 0;}
-.tab-btn{flex:1;padding:10px;background:var(--panel);border:none;color:var(--text-muted);cursor:pointer;font-weight:bold;border-radius:5px;}
-.tab-btn.active{background:var(--accent);color:white;}
-.tab-content{display:none;}
-.tab-content.active{display:block;}
-.character-creation, .character-sheet, .skills-container, .location-panel, .combat-screen{background:var(--panel);padding:20px;border-radius:10px;margin-bottom:20px;}
-.class-grid, .gender-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-.class-option, .gender-option{background: rgba(30,41,59,0.7);padding:15px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid #334155;transition:0.3s;}
-.class-option.selected, .gender-option.selected{border-color:var(--accent);box-shadow:0 0 10px rgba(59,130,246,0.5);}
-.resource-bar{margin-bottom:15px;}
-.bar{height:20px;background:#334155;border-radius:10px;overflow:hidden;}
-.bar-fill{height:100%;width:0;border-radius:10px;}
-.attributes .attribute{display:flex;justify-content:space-between;margin-bottom:10px;}
-.upgrade-btn{background:var(--accent);border:none;border-radius:4px;padding:2px 6px;cursor:pointer;}
-.inventory-panel{margin-top:20px;}
-.inventory-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
-.item-slot{height:60px;background: rgba(30,41,59,0.7);border-radius:8px;display:flex;justify-content:center;align-items:center;border:2px solid #334155;cursor:pointer;}
-.item-slot.equipped{border-color: var(--accent);}
-.combat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
-.combatant{display:flex;flex-direction:column;align-items:center;}
-.combat-health{width:80px;height:15px;background:#334155;border-radius:10px;overflow:hidden;margin-bottom:5px;}
-.combat-health-fill{height:100%;width:100%;background:var(--health);}
-.combat-mana-fill{height:100%;width:100%;background:var(--mana);}
-.combat-btn{padding:8px;margin:5px;border:none;border-radius:6px;cursor:pointer;background:var(--accent);color:white;}
-.level-up-notification{position:fixed;top:20px;right:20px;background:var(--accent);color:white;padding:10px;border-radius:8px;display:none;}
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+body {background: var(--dark-bg); color: var(--text); min-height: 100vh; padding: 20px;}
+.container {max-width:1200px; margin:0 auto;}
+header {text-align:center; margin-bottom:20px; padding:20px; background: var(--panel-bg); border-radius:12px; display:flex; justify-content:space-between; align-items:center;}
+.character-info {display:flex; align-items:center; gap:15px;}
+.character-visual {position:relative; width:80px; height:80px; background: rgba(30,41,59,0.7); border-radius:8px; display:flex; align-items:center; justify-content:center;}
+.character-base {width:50px; height:50px; font-size:2.5rem;}
+.character-weapon, .character-armor {position:absolute; width:30px; height:30px; font-size:1.5rem;}
+.character-weapon {top:25px; left:45px;}
+.character-armor {top:20px; left:30px;}
+.header-text h1 {font-size:1.5rem; margin-bottom:5px; color: var(--accent);}
+.header-text div {color: var(--text-muted);}
+.gold-display {display:flex; align-items:center; gap:8px; font-size:1.2rem; font-weight:bold; color: var(--gold);}
+.tabs {display:flex; margin-bottom:20px; background: var(--panel-bg); border-radius:12px; overflow:hidden;}
+.tab-btn {flex:1; padding:15px; background:transparent; border:none; color: var(--text-muted); cursor:pointer; transition:all 0.3s; font-weight:bold;}
+.tab-btn:hover {background: rgba(59,130,246,0.1); color: var(--text);}
+.tab-btn.active {background: var(--accent); color:white;}
+.tab-content {display:none;}
+.tab-content.active {display:block;}
+.character-creation {display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;}
+.creation-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
+.creation-panel h2 {margin-bottom:20px; color: var(--accent);}
+.nickname-input label {display:block; margin-bottom:8px; font-weight:bold;}
+.nickname-input input {width:100%; padding:12px; background: rgba(30,41,59,0.7); border:2px solid #334155; border-radius:8px; color: var(--text);}
+.nickname-input input:focus {outline:none; border-color: var(--accent);}
+.class-grid, .gender-grid {display:grid; grid-template-columns:repeat(2,1fr); gap:15px; margin-bottom:20px;}
+.class-option, .gender-option {background: rgba(30,41,59,0.7); border:2px solid #334155; border-radius:8px; padding:15px; text-align:center; cursor:pointer; transition:all 0.3s;}
+.class-option:hover, .gender-option:hover {transform:translateY(-3px); border-color: var(--accent);}
+.class-option.selected, .gender-option.selected {border-color: var(--accent); background: rgba(59,130,246,0.2);}
+.character-preview {margin-top:20px; padding-top:20px; border-top:1px solid #334155;}
+.character-preview h3 {margin-bottom:15px; color: var(--accent);}
+.preview-content {display:flex; align-items:center; gap:15px;}
+#character-avatar {font-size:3rem;}
+#character-info {flex:1;}
+#character-name {font-size:1.2rem; font-weight:bold; margin-bottom:5px;}
+#character-level {color: var(--text-muted);}
+.stats-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
+.character-header {display:flex; align-items:center; gap:15px; margin-bottom:20px;}
+#stats-avatar {font-size:3rem; position:relative;}
+.equipment-slots {position:absolute; font-size:1rem;}
+#weapon-slot {top:0; right:-5px;}
+#armor-slot {bottom:0; right:-5px;}
+.resource-bar {margin-bottom:20px;}
+.bar-label {display:flex; justify-content:space-between; margin-bottom:5px;}
+.bar {height:20px; background:#334155; border-radius:10px; overflow:hidden;}
+.bar-fill {height:100%; border-radius:10px; transition:width 0.3s;}
+.health .bar-fill {background: #ef4444;}
+.mana .bar-fill {background: #6366f1;}
+.xp .bar-fill {background: #10b981;}
+.attributes {margin-top:25px;}
+.attribute {display:flex; justify-content:space-between; margin-bottom:12px;}
+.upgrade-btn {background: var(--accent); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:0.8rem;}
+.inventory-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
+.inventory-grid {display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+.item-slot {background: rgba(30,41,59,0.7); height:70px; border-radius:8px; display:flex; align-items:center; justify-content:center; border:2px solid #334155; position:relative; cursor:pointer;}
+.item-slot.equipped {border-color: var(--accent);}
+.item-slot.empty::before {content:"+"; font-size:1.5rem; color: var(--text-muted);}
+.item-icon {font-size:2rem;}
+.start-button {display:block; width:100%; padding:15px; background: var(--accent); color:white; border:none; border-radius:8px; font-size:1.2rem; font-weight:bold; cursor:pointer; margin-top:30px;}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
 <div class="character-info">
-    <div class="character-visual" id="character-visual">⚔️
-        <div class="equipment-slot" id="weapon-slot"></div>
-        <div class="equipment-slot" id="armor-slot"></div>
-    </div>
-    <div>
-        <div id="header-name">Воин</div>
-        <div id="header-level">Уровень 1</div>
-    </div>
+<div class="character-visual">
+<div class="character-base" id="character-base">⚔️</div>
+<div class="character-weapon" id="character-weapon"></div>
+<div class="character-armor" id="character-armor"></div>
 </div>
-<div>🪙 <span id="gold-amount">50</span></div>
+<div class="header-text">
+<h1 id="header-name">Ассасин</h1>
+<div id="header-level">Уровень 1</div>
+</div>
+</div>
+<div class="gold-display">🪙<span id="gold-amount">50</span></div>
 </header>
 
 <div class="tabs">
 <button class="tab-btn active" data-tab="creation">Создание</button>
 <button class="tab-btn" data-tab="stats">Характеристики</button>
 <button class="tab-btn" data-tab="skills">Умения</button>
-<button class="tab-btn" data-tab="location">Локации</button>
-<button class="tab-btn" data-tab="combat">Бой</button>
+<button class="tab-btn" data-tab="inventory">Инвентарь</button>
 </div>
 
 <div class="tab-content active" id="creation">
 <div class="character-creation">
+<div class="creation-panel">
 <h2>Выбор класса</h2>
+<div class="nickname-input">
+<label for="nickname">Имя персонажа:</label>
+<input type="text" id="nickname" placeholder="Введите имя">
+</div>
 <div class="class-grid">
-<div class="class-option selected" data-class="warrior">⚔️ Воин</div>
-<div class="class-option" data-class="mage">🧙 Маг</div>
-<div class="class-option" data-class="archer">🏹 Лучник</div>
-<div class="class-option" data-class="assassin">🗡️ Ассасин</div>
+<div class="class-option selected" data-class="assassin">🖤<br>Ассасин</div>
 </div>
 <h2>Выбор пола</h2>
 <div class="gender-grid">
 <div class="gender-option selected" data-gender="male">👨 Мужской</div>
 <div class="gender-option" data-gender="female">👩 Женский</div>
 </div>
-<label>Имя персонажа:</label>
-<input type="text" id="nickname" placeholder="Введите имя">
-<br><br>
-<button id="create-character" class="combat-btn">Создать персонажа</button>
+<button class="start-button" id="create-character">Создать персонажа</button>
+</div>
+<div class="character-preview">
+<h3>Превью персонажа</h3>
+<div class="preview-content">
+<div id="character-avatar">🖤</div>
+<div id="character-info">
+<div id="character-name">Ассасин</div>
+<div id="character-level">Уровень 1</div>
+<div>HP: <span id="character-hp">100</span> | Ярость: <span id="character-mana">50</span></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 
 <div class="tab-content" id="stats">
-<div class="character-sheet">
-<h2>Характеристики</h2>
+<div class="stats-panel">
+<div class="character-header">
+<div id="stats-avatar">🖤
+<div class="equipment-slots" id="weapon-slot"></div>
+<div class="equipment-slots" id="armor-slot"></div>
+</div>
+<div>
+<div id="stats-name">Имя</div>
+<div id="stats-level">Уровень 1</div>
+</div>
+</div>
 <div class="resource-bar health">
-<div>Здоровье: <span id="health-value">100</span></div>
-<div class="bar"><div class="bar-fill" id="health-bar"></div></div>
+<div class="bar-label"><span>HP</span><span id="hp-value">100</span></div>
+<div class="bar"><div class="bar-fill" id="hp-bar" style="width:100%"></div></div>
 </div>
 <div class="resource-bar mana">
-<div>Мана: <span id="mana-value">50</span></div>
-<div class="bar"><div class="bar-fill" id="mana-bar"></div></div>
+<div class="bar-label"><span>Ярость</span><span id="mana-value">50</span></div>
+<div class="bar"><div class="bar-fill" id="mana-bar" style="width:50%"></div></div>
 </div>
 <div class="resource-bar xp">
-<div>Опыт: <span id="xp-value">0/100</span></div>
-<div class="bar"><div class="bar-fill" id="xp-bar"></div></div>
+<div class="bar-label"><span>XP</span><span id="xp-value">0</span></div>
+<div class="bar"><div class="bar-fill" id="xp-bar" style="width:0%"></div></div>
 </div>
 <div class="attributes">
-<div class="attribute">💪 Сила: <span id="strength-value">5</span> <button class="upgrade-btn" data-stat="strength">+</button></div>
-<div class="attribute">🏃 Ловкость: <span id="agility-value">5</span> <button class="upgrade-btn" data-stat="agility">+</button></div>
-<div class="attribute">❤️ Выносливость: <span id="vitality-value">5</span> <button class="upgrade-btn" data-stat="vitality">+</button></div>
-<div class="attribute">🧠 Интеллект: <span id="intellect-value">5</span> <button class="upgrade-btn" data-stat="intellect">+</button></div>
-<div class="attribute">🍀 Удача: <span id="luck-value">5</span> <button class="upgrade-btn" data-stat="luck">+</button></div>
-</div>
+<div class="attribute"><span>💪 Сила</span> <button class="upgrade-btn" id="upgrade-str">+1</button></div>
+<div class="attribute"><span>🤸 Ловкость</span> <button class="upgrade-btn" id="upgrade-agi">+1</button></div>
+<div class="attribute"><span>❤️ Живучесть</span> <button class="upgrade-btn" id="upgrade-vit">+1</button></div>
+<div class="attribute"><span>🧠 Интеллект</span> <button class="upgrade-btn" id="upgrade-int">+1</button></div>
 </div>
 </div>
 
 <div class="tab-content" id="skills">
-<div class="skills-container">
-<h2>Умения</h2>
-<div id="skills-grid"></div>
+<h3>Умения Ассасина</h3>
+<ul id="skill-list"></ul>
+</div>
+
+<div class="tab-content" id="inventory">
+<h3>Инвентарь</h3>
+<div class="inventory-grid" id="inventory-grid">
+<div class="item-slot empty" data-type="weapon"></div>
+<div class="item-slot empty" data-type="armor"></div>
+<div class="item-slot empty" data-type="weapon"></div>
+<div class="item-slot empty" data-type="armor"></div>
+<div class="item-slot empty" data-type="weapon"></div>
 </div>
 </div>
 
-<div class="tab-content" id="location">
-<div class="location-panel">
-<h2>Локации</h2>
-<div id="locations-grid"></div>
-</div>
-</div>
-
-<div class="tab-content" id="combat">
-<div class="combat-screen">
-<div class="combat-header">
-<div class="combatant">
-<div class="combat-avatar" id="player-combat-avatar">⚔️</div>
-<div class="combat-health"><div class="combat-health-fill" id="player-health-bar"></div></div>
-<div class="combat-health"><div class="combat-mana-fill" id="player-mana-bar"></div></div>
-<div id="player-combat-health">100/100</div>
-</div>
-<div>VS</div>
-<div class="combatant">
-<div class="combat-avatar" id="enemy-combat-avatar">👹</div>
-<div class="combat-health"><div class="combat-health-fill" id="enemy-health-bar"></div></div>
-<div id="enemy-combat-health">50/50</div>
-</div>
-</div>
-<div>
-<button class="combat-btn" id="attack-btn">Атака</button>
-<button class="combat-btn" id="skill-btn">Умение</button>
-<button class="combat-btn" id="flee-btn">Бегство</button>
-</div>
-</div>
-</div>
-
-<div class="level-up-notification" id="level-up-notification">🎉 Поздравляем! Новый уровень!</div>
 </div>
 
 <script>
-let character = {
-    name:'Воин',
-    class:'warrior',
+const tabs = document.querySelectorAll('.tab-btn');
+tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+        tabs.forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+const classOptions = document.querySelectorAll('.class-option');
+const genderOptions = document.querySelectorAll('.gender-option');
+let selectedClass = 'assassin';
+let selectedGender = 'male';
+
+classOptions.forEach(option=>{
+    option.addEventListener('click', ()=>{
+        classOptions.forEach(o=>o.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedClass = option.dataset.class;
+        document.getElementById('character-avatar').textContent = option.textContent.split('\n')[0];
+        document.getElementById('character-base').textContent = option.textContent.split('\n')[0];
+    });
+});
+
+genderOptions.forEach(option=>{
+    option.addEventListener('click', ()=>{
+        genderOptions.forEach(o=>o.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedGender = option.dataset.gender;
+    });
+});
+
+const character = {
+    name:'Ассасин',
+    class:'assassin',
     gender:'male',
     level:1,
-    gold:50,
-    stats:{strength:5, agility:5, vitality:5, intellect:5, luck:5},
     xp:0,
-    health:100,
-    maxHealth:100,
+    gold:50,
+    stats:{str:5, agi:5, vit:5, int:5},
+    hp:100,
     mana:50,
-    maxMana:50,
-    skillPoints:0,
-    equipment:{weapon:null, armor:null},
+    skills:['Удар в спину','Тень','Отравленный клинок','Тихий шаг','Смертельный выпад'],
+    weapon:'',
+    armor:''
 };
 
-const classSkills = {
-    warrior:[{name:'Удар мечом',icon:'⚔️',power:10},{name:'Защитная стойка',icon:'🛡️',power:0,def:true}],
-    mage:[{name:'Огненный шар',icon:'🔥',power:12},{name:'Ледяной щит',icon:'🧊',power:0,def:true}],
-    archer:[{name:'Выстрел',icon:'🏹',power:8},{name:'Скоростной выстрел',icon:'💨',power:12}],
-    assassin:[{name:'Критический удар',icon:'🗡️',power:15},{name:'Скрытность',icon:'🕵️‍♂️',power:0,def:true}]
-};
-
-const monsters = [
-    {name:'Скелет',health:30,icon:'💀',attack:5},
-    {name:'Гоблин',health:40,icon:'👹',attack:7},
-    {name:'Орк',health:60,icon:'👺',attack:10},
-];
-
-const locations = [
-    {name:'Лес',levels:5},
-    {name:'Пещера',levels:5},
-    {name:'Замок',levels:5}
-];
-
-let currentEnemy = null;
-
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-        document.getElementById(btn.dataset.tab).classList.add('active');
-    });
-});
-
-document.querySelectorAll('.class-option').forEach(c=>{
-    c.addEventListener('click',()=>{
-        document.querySelectorAll('.class-option').forEach(b=>b.classList.remove('selected'));
-        c.classList.add('selected');
-        character.class = c.dataset.class;
-        document.getElementById('header-name').textContent = character.class;
-        renderSkills();
-        document.getElementById('character-base').textContent = getClassIcon(character.class);
-    });
-});
-
-document.querySelectorAll('.gender-option').forEach(g=>{
-    g.addEventListener('click',()=>{
-        document.querySelectorAll('.gender-option').forEach(b=>b.classList.remove('selected'));
-        g.classList.add('selected');
-        character.gender = g.dataset.gender;
-    });
-});
-
-document.getElementById('create-character').addEventListener('click',()=>{
-    const nickname = document.getElementById('nickname').value.trim();
-    if(nickname) character.name = nickname;
-    document.getElementById('character-base').textContent = getClassIcon(character.class);
-    document.getElementById('header-name').textContent = character.name;
-    document.querySelector('#creation').style.display='none';
-    renderStats();
-    renderSkills();
-    renderLocations();
-});
-
-function getClassIcon(cls){
-    switch(cls){
-        case 'warrior': return '⚔️';
-        case 'mage': return '🧙';
-        case 'archer': return '🏹';
-        case 'assassin': return '🗡️';
-        default: return '👤';
-    }
-}
-
-function renderStats(){
-    document.getElementById('health-value').textContent = character.health;
+function updateStats(){
+    document.getElementById('stats-name').textContent = character.name;
+    document.getElementById('stats-level').textContent = 'Уровень '+character.level;
+    document.getElementById('hp-value').textContent = character.hp;
     document.getElementById('mana-value').textContent = character.mana;
-    document.getElementById('xp-value').textContent = character.xp + '/100';
-    document.getElementById('strength-value').textContent = character.stats.strength;
-    document.getElementById('agility-value').textContent = character.stats.agility;
-    document.getElementById('vitality-value').textContent = character.stats.vitality;
-    document.getElementById('intellect-value').textContent = character.stats.intellect;
-    document.getElementById('luck-value').textContent = character.stats.luck;
-    document.getElementById('gold-amount').textContent = character.gold;
-
-    // Обновление полос
-    document.getElementById('health-bar').style.width = (character.health/character.maxHealth*100)+'%';
-    document.getElementById('mana-bar').style.width = (character.mana/character.maxMana*100)+'%';
-    document.getElementById('xp-bar').style.width = (character.xp/100*100)+'%';
+    document.getElementById('hp-bar').style.width = character.hp+'%';
+    document.getElementById('mana-bar').style.width = character.mana+'%';
+    document.getElementById('xp-value').textContent = character.xp;
+    document.getElementById('xp-bar').style.width = character.xp+'%';
 }
 
-document.querySelectorAll('.upgrade-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        if(character.skillPoints>0){
-            character.stats[btn.dataset.stat]++;
-            character.skillPoints--;
-            renderStats();
-        }else alert('Очков для прокачки нет');
+document.getElementById('create-character').addEventListener('click', ()=>{
+    const nickname = document.getElementById('nickname').value || selectedClass;
+    character.name = nickname;
+    character.class = selectedClass;
+    character.gender = selectedGender;
+    const skillList = document.getElementById('skill-list');
+    skillList.innerHTML='';
+    character.skills.forEach(skill=>{
+        const li = document.createElement('li'); li.textContent = skill;
+        skillList.appendChild(li);
     });
+    updateStats();
+    alert('Персонаж создан!');
 });
 
-function renderSkills(){
-    const grid = document.getElementById('skills-grid');
-    grid.innerHTML='';
-    classSkills[character.class].forEach(s=>{
-        const div = document.createElement('div');
-        div.textContent = s.icon+' '+s.name;
-        div.style.margin='5px';
-        grid.appendChild(div);
-    });
-}
+document.getElementById('upgrade-str').addEventListener('click', ()=>{character.stats.str++; updateStats();});
+document.getElementById('upgrade-agi').addEventListener('click', ()=>{character.stats.agi++; updateStats();});
+document.getElementById('upgrade-vit').addEventListener('click', ()=>{character.stats.vit++; updateStats();});
+document.getElementById('upgrade-int').addEventListener('click', ()=>{character.stats.int++; updateStats();});
 
-function renderLocations(){
-    const grid = document.getElementById('locations-grid');
-    grid.innerHTML='';
-    locations.forEach(loc=>{
-        const div = document.createElement('div');
-        div.innerHTML=`<h3>${loc.name}</h3>`;
-        for(let i=1;i<=loc.levels;i++){
-            const btn = document.createElement('button');
-            btn.textContent = 'Уровень '+i;
-            btn.classList.add('combat-btn');
-            btn.addEventListener('click',()=>startCombat(JSON.parse(JSON.stringify(monsters[Math.floor(Math.random()*monsters.length)]))));
-            div.appendChild(btn);
+const inventorySlots = document.querySelectorAll('.item-slot');
+inventorySlots.forEach(slot=>{
+    slot.addEventListener('click', ()=>{
+        if(slot.classList.contains('empty')){
+            slot.classList.remove('empty');
+            slot.classList.add('equipped');
+            slot.innerHTML = slot.dataset.type==='weapon' ? '🗡️' : '🛡️';
+            // отображение на персонаже
+            if(slot.dataset.type==='weapon') document.getElementById('character-weapon').textContent = '🗡️';
+            else document.getElementById('character-armor').textContent = '🛡️';
+        }else{
+            slot.classList.add('empty'); slot.classList.remove('equipped'); slot.innerHTML='';
+            if(slot.dataset.type==='weapon') document.getElementById('character-weapon').textContent='';
+            else document.getElementById('character-armor').textContent='';
         }
-        grid.appendChild(div);
     });
-}
-
-function startCombat(monster){
-    currentEnemy = monster;
-    document.querySelector('#combat').classList.add('active');
-    document.getElementById('player-combat-avatar').textContent = getClassIcon(character.class);
-    document.getElementById('enemy-combat-avatar').textContent = monster.icon;
-
-    updateCombatBars();
-
-    document.getElementById('attack-btn').onclick = ()=>playerAttack();
-    document.getElementById('skill-btn').onclick = ()=>useSkill();
-    document.getElementById('flee-btn').onclick = ()=>{alert('Вы убежали!'); currentEnemy=null;};
-}
-
-function updateCombatBars(){
-    document.getElementById('player-combat-health').textContent = character.health+'/'+character.maxHealth;
-    document.getElementById('player-health-bar').style.width = (character.health/character.maxHealth*100)+'%';
-    document.getElementById('player-mana-bar').style.width = (character.mana/character.maxMana*100)+'%';
-    document.getElementById('enemy-combat-health').textContent = currentEnemy.health+'/'+currentEnemy.health;
-    document.getElementById('enemy-health-bar').style.width = (currentEnemy.health/currentEnemy.health*100)+'%';
-}
-
-function playerAttack(){
-    let dmg = character.stats.strength*2;
-    currentEnemy.health-=dmg;
-    if(currentEnemy.health<0) currentEnemy.health=0;
-    document.getElementById('enemy-combat-health').textContent = currentEnemy.health+'/'+currentEnemy.health;
-    document.getElementById('enemy-health-bar').style.width = (currentEnemy.health/currentEnemy.health*100)+'%';
-    if(currentEnemy.health<=0){alert('Монстр побежден!'); gainXP(50); currentEnemy=null; return;}
-    setTimeout(enemyAttack,500);
-}
-
-function useSkill(){
-    let skill = classSkills[character.class][0];
-    if(character.mana>=5){
-        character.mana-=5;
-        currentEnemy.health-=skill.power;
-        if(currentEnemy.health<0) currentEnemy.health=0;
-        alert('Вы использовали '+skill.name+' и нанесли '+skill.power+' урона!');
-        updateCombatBars();
-        if(currentEnemy.health<=0){alert('Монстр побежден!'); gainXP(50); currentEnemy=null; return;}
-        setTimeout(enemyAttack,500);
-    }else alert('Недостаточно маны');
-}
-
-function enemyAttack(){
-    if(!currentEnemy) return;
-    character.health-=currentEnemy.attack;
-    if(character.health<0) character.health=0;
-    updateCombatBars();
-    if(character.health<=0){alert('Вы погибли!'); resetCharacter();}
-}
-
-function gainXP(amount){
-    character.xp+=amount;
-    if(character.xp>=100){
-        character.level++;
-        character.skillPoints+=5;
-        character.xp-=100;
-        showLevelUp();
-    }
-    renderStats();
-}
-
-function showLevelUp(){
-    const div = document.getElementById('level-up-notification');
-    div.style.display='block';
-    setTimeout(()=>div.style.display='none',3000);
-}
-
-function resetCharacter(){
-    character.health=character.maxHealth;
-    character.mana=character.maxMana;
-    renderStats();
-    currentEnemy=null;
-}
+});
 </script>
 </body>
 </html>
