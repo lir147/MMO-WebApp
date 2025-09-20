@@ -2,342 +2,219 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telegram RPG</title>
+<title>RPG Game</title>
 <style>
-:root {
-    --dark-bg: #0f172a;
-    --panel-bg: #1e293b;
-    --accent: #3b82f6;
-    --accent-dark: #2563eb;
-    --text: #f1f5f9;
-    --text-muted: #94a3b8;
-    --health: #ef4444;
-    --mana: #6366f1;
-    --xp: #10b981;
-    --gold: #f59e0b;
-}
-* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-body {background: var(--dark-bg); color: var(--text); min-height: 100vh; padding: 20px;}
-.container {max-width:1200px; margin:0 auto;}
-header {text-align:center; margin-bottom:20px; padding:20px; background: var(--panel-bg); border-radius:12px; display:flex; justify-content:space-between; align-items:center;}
-.character-info {display:flex; align-items:center; gap:15px;}
-.character-visual {position:relative; width:80px; height:80px; background: rgba(30,41,59,0.7); border-radius:8px; display:flex; align-items:center; justify-content:center;}
-.character-base {width:50px; height:50px; font-size:2.5rem;}
-.character-weapon, .character-armor {position:absolute; width:30px; height:30px; font-size:1.5rem;}
-.character-weapon {top:25px; left:45px;}
-.character-armor {top:20px; left:30px;}
-.header-text h1 {font-size:1.5rem; margin-bottom:5px; color: var(--accent);}
-.header-text div {color: var(--text-muted);}
-.gold-display {display:flex; align-items:center; gap:8px; font-size:1.2rem; font-weight:bold; color: var(--gold);}
-.tabs {display:flex; margin-bottom:20px; background: var(--panel-bg); border-radius:12px; overflow:hidden;}
-.tab-btn {flex:1; padding:15px; background:transparent; border:none; color: var(--text-muted); cursor:pointer; transition:all 0.3s; font-weight:bold;}
-.tab-btn:hover {background: rgba(59,130,246,0.1); color: var(--text);}
-.tab-btn.active {background: var(--accent); color:white;}
-.tab-content {display:none;}
-.tab-content.active {display:block;}
-.character-creation {display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;}
-.creation-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
-.creation-panel h2 {margin-bottom:20px; color: var(--accent);}
-.nickname-input label {display:block; margin-bottom:8px; font-weight:bold;}
-.nickname-input input {width:100%; padding:12px; background: rgba(30,41,59,0.7); border:2px solid #334155; border-radius:8px; color: var(--text);}
-.nickname-input input:focus {outline:none; border-color: var(--accent);}
-.class-grid, .gender-grid {display:grid; grid-template-columns:repeat(2,1fr); gap:15px; margin-bottom:20px;}
-.class-option, .gender-option {background: rgba(30,41,59,0.7); border:2px solid #334155; border-radius:8px; padding:15px; text-align:center; cursor:pointer; transition:all 0.3s;}
-.class-option:hover, .gender-option:hover {transform:translateY(-3px); border-color: var(--accent);}
-.class-option.selected, .gender-option.selected {border-color: var(--accent); background: rgba(59,130,246,0.2);}
-.character-preview {margin-top:20px; padding-top:20px; border-top:1px solid #334155;}
-.character-preview h3 {margin-bottom:15px; color: var(--accent);}
-.preview-content {display:flex; align-items:center; gap:15px;}
-#character-avatar {font-size:3rem;}
-#character-info {flex:1;}
-#character-name {font-size:1.2rem; font-weight:bold; margin-bottom:5px;}
-#character-level {color: var(--text-muted);}
-.stats-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
-.character-header {display:flex; align-items:center; gap:15px; margin-bottom:20px;}
-#stats-avatar {font-size:3rem; position:relative;}
-.equipment-slots {position:absolute; font-size:1rem;}
-#weapon-slot {top:0; right:-5px;}
-#armor-slot {bottom:0; right:-5px;}
-.resource-bar {margin-bottom:20px;}
-.bar-label {display:flex; justify-content:space-between; margin-bottom:5px;}
-.bar {height:20px; background:#334155; border-radius:10px; overflow:hidden;}
-.bar-fill {height:100%; border-radius:10px; transition:width 0.3s;}
-.health .bar-fill {background: #ef4444;}
-.mana .bar-fill {background: #6366f1;}
-.xp .bar-fill {background: #10b981;}
-.attributes {margin-top:25px;}
-.attribute {display:flex; justify-content:space-between; margin-bottom:12px;}
-.upgrade-btn {background: var(--accent); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:0.8rem;}
-.inventory-panel {background: var(--panel-bg); padding:20px; border-radius:12px;}
-.inventory-grid {display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
-.item-slot {background: rgba(30,41,59,0.7); height:70px; border-radius:8px; display:flex; align-items:center; justify-content:center; border:2px solid #334155; position:relative; cursor:pointer;}
-.item-slot.equipped {border-color: var(--accent);}
-.item-slot.empty::before {content:"+"; font-size:1.5rem; color: var(--text-muted);}
-.item-icon {font-size:2rem;}
-.start-button {display:block; width:100%; padding:15px; background: var(--accent); color:white; border:none; border-radius:8px; font-size:1.2rem; font-weight:bold; cursor:pointer; margin-top:30px;}
-.battle-panel {background: var(--panel-bg); padding:20px; border-radius:12px; margin-top:20px;}
-.battle-panel button {padding:10px 20px; margin-top:10px; background: var(--accent); border:none; color:white; cursor:pointer; border-radius:6px;}
-#zone-select {margin-top:15px; padding:10px; border-radius:8px; background: rgba(30,41,59,0.7); border:2px solid #334155; color:white;}
+  body{font-family:sans-serif; background:#f0f0f0; margin:0; padding:0;}
+  #game{padding:20px;}
+  .hidden{display:none;}
+  #characterImage{position:relative;width:150px;height:150px;margin-bottom:20px;}
+  #inventory img{width:50px;height:50px;margin:2px;}
+  #battleLog{height:150px;overflow:auto;border:1px solid #000;padding:5px;background:#fff;}
+  button{margin:5px;}
 </style>
 </head>
 <body>
-<div class="container">
-<header>
-<div class="character-info">
-<div class="character-visual">
-<div class="character-base" id="character-base">⚔️</div>
-<div class="character-weapon" id="character-weapon"></div>
-<div class="character-armor" id="character-armor"></div>
-</div>
-<div class="header-text">
-<h1 id="header-name">Персонаж</h1>
-<div id="header-level">Уровень 1</div>
-</div>
-</div>
-<div class="gold-display">🪙<span id="gold-amount">50</span></div>
-</header>
+<div id="game">
+  <div id="createCharacter">
+    <h2>Создать персонажа</h2>
+    <select id="classSelect">
+      <option value="warrior">Воин</option>
+      <option value="mage">Маг</option>
+      <option value="archer">Лучник</option>
+      <option value="assassin">Ассасин</option>
+    </select>
+    <button onclick="createCharacter()">Создать</button>
+  </div>
 
-<div class="tabs">
-<button class="tab-btn active" data-tab="creation">Создание</button>
-<button class="tab-btn" data-tab="stats">Характеристики</button>
-<button class="tab-btn" data-tab="skills">Умения</button>
-<button class="tab-btn" data-tab="inventory">Инвентарь</button>
-<button class="tab-btn" data-tab="battle">Битвы</button>
-</div>
-
-<div class="tab-content active" id="creation">
-<div class="character-creation">
-<div class="creation-panel">
-<h2>Выбор класса</h2>
-<div class="nickname-input">
-<label for="nickname">Имя персонажа:</label>
-<input type="text" id="nickname" placeholder="Введите имя">
-</div>
-<div class="class-grid">
-<div class="class-option selected" data-class="assassin" data-weapon="🗡️" data-armor="🖤">🖤<br>Ассасин</div>
-<div class="class-option" data-class="warrior" data-weapon="🪓" data-armor="🛡️">🪓<br>Воин</div>
-<div class="class-option" data-class="mage" data-weapon="🔮" data-armor="🧙">🔮<br>Маг</div>
-<div class="class-option" data-class="archer" data-weapon="🏹" data-armor="🦺">🏹<br>Лучник</div>
-</div>
-<h2>Выбор пола</h2>
-<div class="gender-grid">
-<div class="gender-option selected" data-gender="male">👨 Мужской</div>
-<div class="gender-option" data-gender="female">👩 Женский</div>
-</div>
-<button class="start-button" id="create-character">Создать персонажа</button>
-</div>
-<div class="character-preview">
-<h3>Превью персонажа</h3>
-<div class="preview-content">
-<div id="character-avatar">🖤</div>
-<div id="character-info">
-<div id="character-name">Ассасин</div>
-<div id="character-level">Уровень 1</div>
-<div>HP: <span id="character-hp">100</span> | Ярость: <span id="character-mana">50</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-<div class="tab-content" id="stats">
-<div class="stats-panel">
-<div class="character-header">
-<div id="stats-avatar">🖤
-<div class="equipment-slots" id="weapon-slot"></div>
-<div class="equipment-slots" id="armor-slot"></div>
-</div>
-<div>
-<div id="stats-name">Имя</div>
-<div id="stats-level">Уровень 1</div>
-</div>
-</div>
-<div class="resource-bar health">
-<div class="bar-label"><span>HP</span><span id="hp-value">100</span></div>
-<div class="bar"><div class="bar-fill" id="hp-bar" style="width:100%"></div></div>
-</div>
-<div class="resource-bar mana">
-<div class="bar-label"><span>Ярость</span><span id="mana-value">50</span></div>
-<div class="bar"><div class="bar-fill" id="mana-bar" style="width:50%"></div></div>
-</div>
-<div class="resource-bar xp">
-<div class="bar-label"><span>XP</span><span id="xp-value">0</span></div>
-<div class="bar"><div class="bar-fill" id="xp-bar" style="width:0%"></div></div>
-</div>
-<div class="attributes">
-<div class="attribute"><span>💪 Сила</span> <button class="upgrade-btn" id="upgrade-str">+1</button></div>
-<div class="attribute"><span>🤸 Ловкость</span> <button class="upgrade-btn" id="upgrade-agi">+1</button></div>
-<div class="attribute"><span>❤️ Живучесть</span> <button class="upgrade-btn" id="upgrade-vit">+1</button></div>
-<div class="attribute"><span>🧠 Интеллект</span> <button class="upgrade-btn" id="upgrade-int">+1</button></div>
-</div>
-</div>
-
-<div class="tab-content" id="skills">
-<h3>Умения персонажа</h3>
-<ul id="skill-list"></ul>
-</div>
-
-<div class="tab-content" id="inventory">
-<h3>Инвентарь</h3>
-<div class="inventory-grid" id="inventory-grid">
-<div class="item-slot empty" data-type="weapon"></div>
-<div class="item-slot empty" data-type="armor"></div>
-<div class="item-slot empty" data-type="weapon"></div>
-<div class="item-slot empty" data-type="armor"></div>
-<div class="item-slot empty" data-type="weapon"></div>
-</div>
-</div>
-
-<div class="tab-content" id="battle">
-<h3>Сражения с монстрами</h3>
-<select id="zone-select">
-<option value="forest">🌲 Лес 1–5</option>
-<option value="dungeon">🕳 Подземелье 1–5</option>
-</select>
-<div class="battle-panel" id="battle-panel">
-<button id="start-battle">Начать бой с монстром</button>
-<div id="battle-log" style="margin-top:15px;"></div>
-</div>
-</div>
-
+  <div id="mainGame" class="hidden">
+    <div id="characterImage"></div>
+    <div id="stats"></div>
+    <button onclick="moveLocation()">Перейти в локацию</button>
+    <button onclick="getQuest()">Получить задание</button>
+    <h3>Инвентарь</h3>
+    <div id="inventory"></div>
+    <h3>Бой</h3>
+    <button onclick="fightMonster()">Сражение с монстром</button>
+    <div id="battleLog"></div>
+  </div>
 </div>
 
 <script>
-const tabs = document.querySelectorAll('.tab-btn');
-tabs.forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-        tabs.forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-        document.getElementById(tab.dataset.tab).classList.add('active');
-    });
-});
+// ----- Игрок -----
+let player = null;
+let currentLocation = 0;
 
-const classOptions = document.querySelectorAll('.class-option');
-const genderOptions = document.querySelectorAll('.gender-option');
-let selectedClass = 'assassin';
-let selectedGender = 'male';
-let selectedWeapon = '🗡️';
-let selectedArmor = '🖤';
+const classes = {
+  warrior:{hp:100, attack:10, crit:5, speed:5, mana:0},
+  mage:{hp:70, attack:5, crit:5, speed:5, mana:50},
+  archer:{hp:80, attack:8, crit:10, speed:7, mana:0},
+  assassin:{hp:75, attack:12, crit:15, speed:10, mana:0}
+};
 
-classOptions.forEach(option=>{
-    option.addEventListener('click', ()=>{
-        classOptions.forEach(o=>o.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedClass = option.dataset.class;
-        selectedWeapon = option.dataset.weapon;
-        selectedArmor = option.dataset.armor;
-        document.getElementById('character-avatar').textContent = option.textContent.split('\n')[0];
-        document.getElementById('character-base').textContent = option.textContent.split('\n')[0];
-    });
-});
+const equipment = {
+  warrior:{weapon:['Меч','Топор'], armor:['Щит','Броня']},
+  mage:{weapon:['Посох','Книга'], armor:['Мантия','Роба']},
+  archer:{weapon:['Лук','Арбалет'], armor:['Кожаная броня','Плащ']},
+  assassin:{weapon:['Кинжал','Короткий меч'], armor:['Легкая броня','Маска']}
+};
 
-genderOptions.forEach(option=>{
-    option.addEventListener('click', ()=>{
-        genderOptions.forEach(o=>o.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedGender = option.dataset.gender;
-    });
-});
+// ----- Локации и монстры -----
+const locations = [
+  {name:'Лесная тропа', monsters:['Гоблин','Волк']},
+  {name:'Подземелье', monsters:['Паук','Скелет']},
+  {name:'Таверна', monsters:[]}
+];
 
-const character = {
-    name:'Персонаж',
-    class:'assassin',
-    gender:'male',
+const quests = {
+  'Лесная тропа': [{name:'Убей 3 гоблинов', reward:{exp:20, gold:10, item:{name:'Деревянный меч', type:'weapon', rarity:'common'}}}],
+  'Подземелье': [{name:'Убей пауков', reward:{exp:25, gold:15}}]
+};
+
+// ----- Сохранение -----
+function savePlayer(){ localStorage.setItem('rpgPlayer',JSON.stringify(player)); }
+function loadPlayer(){
+  const p = localStorage.getItem('rpgPlayer');
+  if(p){ player=JSON.parse(p); showMainGame(); updateStatsUI(); updateInventoryUI(); updateCharacterDisplay(); }
+}
+loadPlayer();
+
+// ----- Создание -----
+function createCharacter(){
+  const cls = document.getElementById('classSelect').value;
+  const stats = classes[cls];
+  player = {
+    class:cls,
     level:1,
-    xp:0,
-    gold:50,
-    stats:{str:5, agi:5, vit:5, int:5},
-    hp:100,
-    mana:50,
-    skills:['Удар в спину','Тень','Отравленный клинок','Тихий шаг','Смертельный выпад'],
-    weapon:selectedWeapon,
-    armor:selectedArmor
-};
-
-const classSkills = {
-    assassin:['Удар в спину','Тень','Отравленный клинок','Тихий шаг','Смертельный выпад'],
-    warrior:['Сильный удар','Щитовая защита','Боевой клич','Вихрь','Рывок'],
-    mage:['Огненный шар','Ледяной щит','Магический взрыв','Исцеляющий свет','Телепортация'],
-    archer:['Стрела в сердце','Многозарядная стрела','Ловкость','Точный выстрел','Маскировка']
-};
-
-const zones = {
-    forest:[
-        {name:'Скелет', hp:30, str:3, xp:10, gold:5},
-        {name:'Гоблин', hp:50, str:5, xp:20, gold:10},
-        {name:'Волк', hp:40, str:4, xp:15, gold:8}
-    ],
-    dungeon:[
-        {name:'Подземный Скелет', hp:60, str:6, xp:30, gold:15},
-        {name:'Огромный Гоблин', hp:80, str:8, xp:40, gold:20},
-        {name:'Тролль', hp:100, str:10, xp:50, gold:25}
-    ]
-};
-
-function updateStats(){
-    document.getElementById('stats-name').textContent = character.name;
-    document.getElementById('stats-level').textContent = 'Уровень '+character.level;
-    document.getElementById('hp-value').textContent = character.hp;
-    document.getElementById('mana-value').textContent = character.mana;
-    document.getElementById('hp-bar').style.width = character.hp+'%';
-    document.getElementById('mana-bar').style.width = character.mana+'%';
-    document.getElementById('xp-value').textContent = character.xp;
-    document.getElementById('xp-bar').style.width = character.xp+'%';
-    document.getElementById('gold-amount').textContent = character.gold;
-    document.getElementById('weapon-slot').textContent = character.weapon;
-    document.getElementById('armor-slot').textContent = character.armor;
-    document.getElementById('header-name').textContent = character.name;
-    document.getElementById('header-level').textContent = 'Уровень '+character.level;
+    exp:0,
+    hp:stats.hp,
+    attack:stats.attack,
+    crit:stats.crit,
+    speed:stats.speed,
+    mana:stats.mana,
+    inventory:[],
+    weapon:null,
+    armor:null,
+    gold:0
+  };
+  savePlayer();
+  showMainGame();
+  updateStatsUI();
+  updateCharacterDisplay();
 }
 
-document.getElementById('create-character').addEventListener('click', ()=>{
-    const nickname = document.getElementById('nickname').value || selectedClass;
-    character.name = nickname;
-    character.class = selectedClass;
-    character.gender = selectedGender;
-    character.weapon = selectedWeapon;
-    character.armor = selectedArmor;
-    character.skills = classSkills[selectedClass];
-    const skillList = document.getElementById('skill-list');
-    skillList.innerHTML='';
-    character.skills.forEach(skill=>{
-        const li = document.createElement('li'); li.textContent = skill;
-        skillList.appendChild(li);
-    });
-    updateStats();
-    alert('Персонаж создан!');
-});
+// ----- UI -----
+function showMainGame(){
+  document.getElementById('createCharacter').classList.add('hidden');
+  document.getElementById('mainGame').classList.remove('hidden');
+}
 
-document.getElementById('start-battle').addEventListener('click', ()=>{
-    const selectedZone = document.getElementById('zone-select').value;
-    const monster = zones[selectedZone][Math.floor(Math.random()*zones[selectedZone].length)];
-    const battleLog = document.getElementById('battle-log');
-    battleLog.innerHTML = `<b>Начало боя с ${monster.name}!</b><br>`;
-    let monsterHp = monster.hp;
-    const interval = setInterval(()=>{
-        let damage = character.stats.str + Math.floor(Math.random()*5);
-        monsterHp -= damage;
-        battleLog.innerHTML += `Вы наносите ${damage} урона. Осталось HP монстра: ${Math.max(monsterHp,0)}<br>`;
-        if(monsterHp <=0){
-            battleLog.innerHTML += `<b>Монстр повержен! +${monster.xp} XP, +${monster.gold} золота</b><br>`;
-            character.xp += monster.xp;
-            character.gold += monster.gold;
-            updateStats();
-            clearInterval(interval);
-            return;
-        }
-        let mDamage = monster.str + Math.floor(Math.random()*3);
-        character.hp -= mDamage;
-        battleLog.innerHTML += `${monster.name} наносит ${mDamage} урона. Ваш HP: ${Math.max(character.hp,0)}<br>`;
-        if(character.hp <=0){
-            battleLog.innerHTML += `<b>Вы проиграли!</b><br>`;
-            character.hp = 50;
-            updateStats();
-            clearInterval(interval);
-        }
-    },1000);
-});
+function updateStatsUI(){
+  const statsDiv=document.getElementById('stats');
+  statsDiv.innerHTML = `
+    Класс: ${player.class}<br>
+    Уровень: ${player.level} | EXP: ${player.exp}<br>
+    HP: ${player.hp}<br>
+    Атака: ${player.attack} | Крит: ${player.crit} | Скорость: ${player.speed} | Мана: ${player.mana}<br>
+    Золото: ${player.gold}
+  `;
+}
+
+function updateInventoryUI(){
+  const inv=document.getElementById('inventory');
+  inv.innerHTML='';
+  player.inventory.forEach(item=>{
+    const img=document.createElement('img');
+    img.src=`icons/${item.name}.png`;
+    img.title=`${item.name} (${item.rarity||'common'})`;
+    inv.appendChild(img);
+  });
+}
+
+// ----- Визуализация персонажа -----
+function updateCharacterDisplay(){
+  const div=document.getElementById('characterImage');
+  div.innerHTML='';
+
+  const charDiv=document.createElement('div');
+  charDiv.style.width='100%'; charDiv.style.height='100%';
+  charDiv.style.background=`url('icons/${player.class}.png') center/contain no-repeat`;
+  div.appendChild(charDiv);
+
+  if(player.weapon){
+    const wDiv=document.createElement('div');
+    wDiv.style.width='100%'; wDiv.style.height='100%'; wDiv.style.position='absolute';
+    wDiv.style.background=`url('icons/${player.weapon}.png') center/contain no-repeat`;
+    div.appendChild(wDiv);
+  }
+
+  if(player.armor){
+    const aDiv=document.createElement('div');
+    aDiv.style.width='100%'; aDiv.style.height='100%'; aDiv.style.position='absolute';
+    aDiv.style.background=`url('icons/${player.armor}.png') center/contain no-repeat`;
+    div.appendChild(aDiv);
+  }
+}
+
+// ----- Передвижение -----
+function moveLocation(){
+  currentLocation = (currentLocation+1) % locations.length;
+  alert(`Вы перешли в локацию: ${locations[currentLocation].name}`);
+}
+
+// ----- Задания -----
+function getQuest(){
+  const locName = locations[currentLocation].name;
+  const questList = quests[locName] || [];
+  if(questList.length===0){ alert('Нет доступных заданий'); return; }
+  const quest = questList[Math.floor(Math.random()*questList.length)];
+  alert(`Задание: ${quest.name}`);
+  rewardQuest(quest.reward);
+}
+
+function rewardQuest(reward){
+  if(reward.exp) player.exp += reward.exp;
+  if(reward.gold) player.gold += reward.gold;
+  if(reward.item) player.inventory.push(reward.item);
+  updateStatsUI();
+  updateInventoryUI();
+  savePlayer();
+}
+
+// ----- Бой -----
+function fightMonster(){
+  const loc = locations[currentLocation];
+  if(loc.monsters.length===0){ alert('Здесь нет монстров'); return; }
+  const monster = loc.monsters[Math.floor(Math.random()*loc.monsters.length)];
+  const level = Math.floor(Math.random()*5)+1;
+  let monsterHP = 20*level;
+  addBattleLog(`Встречен ${monster} уровня ${level} с ${monsterHP} HP`);
+
+  const damage = player.attack + Math.floor(Math.random()*5);
+  monsterHP -= damage;
+  addBattleLog(`Вы нанесли ${damage} урона. Осталось HP монстра: ${monsterHP}`);
+
+  const monsterAttack = 5*level;
+  player.hp -= monsterAttack;
+  addBattleLog(`Монстр атакует! Урон: ${monsterAttack}. Ваше HP: ${player.hp}`);
+
+  if(player.hp<=0){ alert('Вы погибли!'); localStorage.removeItem('rpgPlayer'); location.reload(); return; }
+
+  if(monsterHP<=0){
+    addBattleLog(`${monster} побежден! Вы получаете ${level*2} опыта`);
+    player.exp += level*2;
+    savePlayer();
+    updateStatsUI();
+  }
+}
+
+function addBattleLog(msg){
+  const log=document.getElementById('battleLog');
+  log.innerHTML += msg+'<br>';
+  log.scrollTop = log.scrollHeight;
+}
+
+// ----- Вспомогательные -----
+function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 </script>
+</body>
 </html>
