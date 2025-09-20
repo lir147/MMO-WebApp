@@ -1,86 +1,260 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini-RPG — Inventory & Skills</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Персонаж</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="wrap">
+    <div class="container">
+        <header>
+            <h1>Создание Персонажа</h1>
+            <p>Выберите класс и пол вашего персонажа</p>
+        </header>
 
-    <header>
-      <h1>Mini-RPG</h1>
-      <div class="top-controls">
-        <label for="classSelect">Класс:</label>
-        <select id="classSelect"></select>
-        <button id="newFightBtn">Сразиться (рандом)</button>
-        <button id="addExpBtn">+50 XP (тест)</button>
-      </div>
-    </header>
-
-    <main class="main-grid">
-
-      <!-- Character / Stats / Equipment -->
-      <section class="panel" id="characterPanel">
-        <div class="char-top">
-          <div>
-            <h2 id="char-name">Воин</h2>
-            <div>Уровень: <b id="char-level">1</b> &nbsp; | &nbsp; XP: <b id="char-exp">0</b>/<b id="char-xp-next">100</b></div>
-          </div>
-          <div class="stat-points">Свободно очков: <b id="stat-points">5</b></div>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="creation">Создание</button>
+            <button class="tab-btn" data-tab="stats">Характеристики</button>
+            <button class="tab-btn" data-tab="skills">Умения</button>
+            <button class="tab-btn" data-tab="tavern">Таверна</button>
+            <button class="tab-btn" data-tab="location">Локации</button>
         </div>
 
-        <div class="char-body">
-          <div class="char-portrait" id="char-portrait"></div>
+        <div class="tab-content active" id="creation">
+            <div class="character-creation">
+                <div class="creation-panel">
+                    <h2>Выбор класса</h2>
+                    <div class="nickname-input">
+                        <label for="nickname">Имя персонажа:</label>
+                        <input type="text" id="nickname" placeholder="Введите имя">
+                    </div>
+                    <div class="class-grid">
+                        <div class="class-option selected" data-class="warrior">
+                            <div class="class-icon">⚔️</div>
+                            <div class="class-name">Воин</div>
+                            <div class="class-desc">Сильный боец ближнего боя</div>
+                        </div>
+                        <div class="class-option" data-class="mage">
+                            <div class="class-icon">🧙</div>
+                            <div class="class-name">Маг</div>
+                            <div class="class-desc">Мощные заклинания и контроль</div>
+                        </div>
+                        <div class="class-option" data-class="archer">
+                            <div class="class-icon">🏹</div>
+                            <div class="class-name">Лучник</div>
+                            <div class="class-desc">Точные выстрелы на расстоянии</div>
+                        </div>
+                        <div class="class-option" data-class="rogue">
+                            <div class="class-icon">🗡️</div>
+                            <div class="class-name">Разбойник</div>
+                            <div class="class-desc">Скрытность и смертельные атаки</div>
+                        </div>
+                    </div>
+                </div>
 
-          <div class="stats-panel">
-            <div class="stat-row">HP: <span id="stat-hp"></span> <button onclick="alloc('hp')">+</button></div>
-            <div class="stat-row">MP: <span id="stat-mp"></span> <button onclick="alloc('mp')">+</button></div>
-            <div class="stat-row">STR: <span id="stat-str"></span> <button onclick="alloc('str')">+</button></div>
-            <div class="stat-row">AGI: <span id="stat-agi"></span> <button onclick="alloc('agi')">+</button></div>
-            <div class="stat-row">INT: <span id="stat-int"></span> <button onclick="alloc('int')">+</button></div>
-            <div class="stat-row">CRIT: <span id="stat-crit"></span> <button onclick="alloc('crit')">+</button></div>
-          </div>
+                <div class="creation-panel">
+                    <h2>Выбор пола</h2>
+                    <div class="gender-grid">
+                        <div class="gender-option selected" data-gender="male">
+                            <div class="class-icon">👨</div>
+                            <div class="class-name">Мужской</div>
+                        </div>
+                        <div class="gender-option" data-gender="female">
+                            <div class="class-icon">👩</div>
+                            <div class="class-name">Женский</div>
+                        </div>
+                    </div>
+
+                    <div class="character-preview">
+                        <h3>Предпросмотр</h3>
+                        <div class="preview-content">
+                            <div id="character-avatar">⚔️</div>
+                            <div id="character-info">
+                                <div id="character-name">Воин</div>
+                                <div id="character-level">Уровень 1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <h3>Экипировка</h3>
-        <div class="equip-grid">
-          <div class="slot" id="weapon-slot" data-slot="weapon">Оружие</div>
-          <div class="slot" id="helmet-slot" data-slot="helmet">Шлем</div>
-          <div class="slot" id="armor-slot" data-slot="armor">Броня</div>
-          <div class="slot" id="pants-slot" data-slot="pants">Штаны</div>
-          <div class="slot" id="boots-slot" data-slot="boots">Ботинки</div>
-          <div class="slot" id="accessory-slot" data-slot="accessory">Аксессуар</div>
+        <div class="tab-content" id="stats">
+            <div class="character-sheet">
+                <div class="stats-panel">
+                    <h2>Характеристики</h2>
+
+                    <div class="character-header">
+                        <div id="stats-avatar">⚔️</div>
+                        <div>
+                            <div id="stats-name">Воин</div>
+                            <div id="stats-class">Уровень 1</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-bar health">
+                        <div class="bar-label">
+                            <span>Здоровье</span>
+                            <span id="health-value">100 / 100</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill" id="health-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="resource-bar mana">
+                        <div class="bar-label">
+                            <span>Мана</span>
+                            <span id="mana-value">50 / 50</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill" id="mana-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="resource-bar xp">
+                        <div class="bar-label">
+                            <span>Опыт</span>
+                            <span id="xp-value">0 / 100</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill" id="xp-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <div class="attribute-icon">💪</div>
+                                <span>Сила</span>
+                            </div>
+                            <div class="attribute-value" id="strength-value">10</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <div class="attribute-icon">🏃</div>
+                                <span>Ловкость</span>
+                            </div>
+                            <div class="attribute-value" id="agility-value">8</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <div class="attribute-icon">❤️</div>
+                                <span>Живучесть</span>
+                            </div>
+                            <div class="attribute-value" id="vitality-value">12</div>
+                        </div>
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <div class="attribute-icon">🧠</div>
+                                <span>Интеллект</span>
+                            </div>
+                            <div class="attribute-value" id="intellect-value">5</div>
+                        </div>
+                    </div>
+
+                    <div class="combat-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="attack-value">10-12</div>
+                            <div class="stat-name">Атака</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="crit-value">5%</div>
+                            <div class="stat-name">Крит. удар</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="speed-value">100%</div>
+                            <div class="stat-name">Скорость</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="defense-value">15</div>
+                            <div class="stat-name">Защита</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inventory-panel">
+                    <h2>Рюкзак</h2>
+                    <div class="inventory-grid" id="inventory">
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                        <div class="item-slot empty"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </section>
 
-      <!-- Inventory -->
-      <section class="panel" id="inventoryPanel">
-        <h3>Инвентарь</h3>
-        <div id="inventoryGrid" class="inventory-grid"></div>
-        <div class="legend">
-          <span class="rarity common"></span>Обычный
-          <span class="rarity rare"></span>Редкий
-          <span class="rarity epic"></span>Эпический
-          <span class="rarity legendary"></span>Легендарный
+        <div class="tab-content" id="skills">
+            <div class="skills-container">
+                <h2>Умения класса</h2>
+                <div class="skills-grid" id="skills-grid">
+                    <!-- Skills will be populated by JavaScript -->
+                </div>
+            </div>
         </div>
-      </section>
 
-      <!-- Skills -->
-      <section class="panel" id="skillsPanel">
-        <h3>Древо умений</h3>
-        <div id="skillTree" class="skill-tree"></div>
-      </section>
+        <div class="tab-content" id="tavern">
+            <div class="tavern-panel">
+                <h2>Таверна "У Гнома"</h2>
+                <div class="tavern-desc">
+                    <p>Дымное помещение наполнено смехом и разговорами. За стойкой старый гном наливает эль.
+                    На доске объявлений висят заказы на уничтожение монстров.</p>
+                </div>
 
-    </main>
+                <div class="quests-grid" id="quests-grid">
+                    <!-- Quests will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
 
-    <footer class="panel small">
-      <div id="log">Лог: готово.</div>
-    </footer>
+        <div class="tab-content" id="location">
+            <div class="location-panel">
+                <h2 class="location-title">Пригород Эмона</h2>
+                <p class="location-desc">
+                    Пригород Эмона всегда был местом неспокойным. Жуки, черви, Саблекубый крот.
+                    Окраина леса, невидимая граница, отделяющая Эмон от дикой части континента.
+                </p>
 
-  </div>
+                <div class="locations-grid">
+                    <div class="location">
+                        <div class="location-name">Проклятый сад</div>
+                        <div class="location-type">Подземелье</div>
+                        <div class="location-desc">Это было любимое место прогулок знати. Но владелец обратился к темной магии.</div>
+                        <button class="location-btn">Отправиться</button>
+                    </div>
+                    <div class="location">
+                        <div class="location-name">Озеро Королей</div>
+                        <div class="location-type">Водоём</div>
+                        <div class="location-desc">По легенде, именно в нем утопили аж трех предыдущих правителей Эмона.</div>
+                        <button class="location-btn">Отправиться</button>
+                    </div>
+                    <div class="location">
+                        <div class="location-name">Зеленые топи</div>
+                        <div class="location-type">Болото</div>
+                        <div class="location-desc">Нежить, комары размером с кошку, древние руины, неожиданно всплывающие из трясины.</div>
+                        <button class="location-btn">Отправиться</button>
+                    </div>
+                    <div class="location">
+                        <div class="location-name">Подземелья</div>
+                        <div class="location-type">Подземелье</div>
+                        <div class="location-desc">Позод, Арена, Локации - множество опасностей и сокровищ ждут вас.</div>
+                        <button class="location-btn">Отправиться</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <script src="script.js"></script>
+        <button class="start-button" id="start-button">Начать игру</button>
+    </div>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
