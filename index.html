@@ -16,194 +16,46 @@
     --xp: #10b981;
     --gold: #f59e0b;
 }
-body{
-    margin:0;
-    font-family:'Segoe UI',sans-serif;
-    background: var(--bg);
-    color: var(--text);
-}
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:20px;
-}
-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:var(--panel);
-    padding:15px;
-    border-radius:10px;
-}
-.character-info{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-.character-visual{
-    position:relative;
-    width:80px;
-    height:80px;
-    background: rgba(30,41,59,0.7);
-    border-radius:8px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-#character-base{
-    font-size:3rem;
-}
-.equipment-slot{
-    position:absolute;
-    font-size:1.5rem;
-}
-#weapon-slot{
-    top:0; right:-5px;
-}
-#armor-slot{
-    bottom:0; right:-5px;
-}
-.tabs{
-    display:flex;
-    gap:5px;
-    margin:20px 0;
-}
-.tab-btn{
-    flex:1;
-    padding:10px;
-    background:var(--panel);
-    border:none;
-    color:var(--text-muted);
-    cursor:pointer;
-    font-weight:bold;
-    border-radius:5px;
-}
-.tab-btn.active{
-    background:var(--accent);
-    color:white;
-}
+body{margin:0;font-family:'Segoe UI',sans-serif;background: var(--bg);color: var(--text);}
+.container{max-width:1200px;margin:auto;padding:20px;}
+header{display:flex;justify-content:space-between;align-items:center;background:var(--panel);padding:15px;border-radius:10px;}
+.character-info{display:flex;align-items:center;gap:15px;}
+.character-visual{position:relative;width:80px;height:80px;background: rgba(30,41,59,0.7);border-radius:8px;display:flex;justify-content:center;align-items:center;font-size:3rem;}
+.equipment-slot{position:absolute;font-size:1.5rem;}
+#weapon-slot{top:0; right:-5px;}
+#armor-slot{bottom:0; right:-5px;}
+.tabs{display:flex;gap:5px;margin:20px 0;}
+.tab-btn{flex:1;padding:10px;background:var(--panel);border:none;color:var(--text-muted);cursor:pointer;font-weight:bold;border-radius:5px;}
+.tab-btn.active{background:var(--accent);color:white;}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
-.character-creation, .character-sheet, .skills-container, .tavern-panel, .location-panel, .combat-screen{
-    background:var(--panel);
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:20px;
-}
-.class-grid, .gender-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-}
-.class-option, .gender-option{
-    background: rgba(30,41,59,0.7);
-    padding:15px;
-    border-radius:8px;
-    text-align:center;
-    cursor:pointer;
-    border:2px solid #334155;
-    transition:0.3s;
-}
-.class-option.selected, .gender-option.selected{
-    border-color:var(--accent);
-    box-shadow:0 0 10px rgba(59,130,246,0.5);
-}
-.resource-bar{
-    margin-bottom:15px;
-}
-.bar{
-    height:20px;
-    background:#334155;
-    border-radius:10px;
-    overflow:hidden;
-}
-.bar-fill{
-    height:100%;
-    width:0;
-    border-radius:10px;
-}
-.attributes .attribute{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:10px;
-}
-.upgrade-btn{
-    background:var(--accent);
-    border:none;
-    border-radius:4px;
-    padding:2px 6px;
-    cursor:pointer;
-}
-.inventory-panel{
-    margin-top:20px;
-}
-.inventory-grid{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:10px;
-}
-.item-slot{
-    height:60px;
-    background: rgba(30,41,59,0.7);
-    border-radius:8px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    border:2px solid #334155;
-}
-.item-slot.equipped{
-    border-color: var(--accent);
-}
-.combat-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
-}
-.combatant{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-.combat-health{
-    width:80px;
-    height:15px;
-    background:#334155;
-    border-radius:10px;
-    overflow:hidden;
-}
-.combat-health-fill{
-    height:100%;
-    width:100%;
-    background:var(--health);
-}
-.combat-btn{
-    padding:8px;
-    margin:5px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    background:var(--accent);
-    color:white;
-}
-.level-up-notification{
-    position:fixed;
-    top:20px;
-    right:20px;
-    background:var(--accent);
-    color:white;
-    padding:10px;
-    border-radius:8px;
-    display:none;
-}
+.character-creation, .character-sheet, .skills-container, .location-panel, .combat-screen{background:var(--panel);padding:20px;border-radius:10px;margin-bottom:20px;}
+.class-grid, .gender-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.class-option, .gender-option{background: rgba(30,41,59,0.7);padding:15px;border-radius:8px;text-align:center;cursor:pointer;border:2px solid #334155;transition:0.3s;}
+.class-option.selected, .gender-option.selected{border-color:var(--accent);box-shadow:0 0 10px rgba(59,130,246,0.5);}
+.resource-bar{margin-bottom:15px;}
+.bar{height:20px;background:#334155;border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;width:0;border-radius:10px;}
+.attributes .attribute{display:flex;justify-content:space-between;margin-bottom:10px;}
+.upgrade-btn{background:var(--accent);border:none;border-radius:4px;padding:2px 6px;cursor:pointer;}
+.inventory-panel{margin-top:20px;}
+.inventory-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.item-slot{height:60px;background: rgba(30,41,59,0.7);border-radius:8px;display:flex;justify-content:center;align-items:center;border:2px solid #334155;cursor:pointer;}
+.item-slot.equipped{border-color: var(--accent);}
+.combat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
+.combatant{display:flex;flex-direction:column;align-items:center;}
+.combat-health{width:80px;height:15px;background:#334155;border-radius:10px;overflow:hidden;margin-bottom:5px;}
+.combat-health-fill{height:100%;width:100%;background:var(--health);}
+.combat-mana-fill{height:100%;width:100%;background:var(--mana);}
+.combat-btn{padding:8px;margin:5px;border:none;border-radius:6px;cursor:pointer;background:var(--accent);color:white;}
+.level-up-notification{position:fixed;top:20px;right:20px;background:var(--accent);color:white;padding:10px;border-radius:8px;display:none;}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
 <div class="character-info">
-    <div class="character-visual">
-        <div id="character-base">⚔️</div>
+    <div class="character-visual" id="character-visual">⚔️
         <div class="equipment-slot" id="weapon-slot"></div>
         <div class="equipment-slot" id="armor-slot"></div>
     </div>
@@ -225,7 +77,6 @@ header{
 
 <div class="tab-content active" id="creation">
 <div class="character-creation">
-<div>
 <h2>Выбор класса</h2>
 <div class="class-grid">
 <div class="class-option selected" data-class="warrior">⚔️ Воин</div>
@@ -242,7 +93,6 @@ header{
 <input type="text" id="nickname" placeholder="Введите имя">
 <br><br>
 <button id="create-character" class="combat-btn">Создать персонажа</button>
-</div>
 </div>
 </div>
 
@@ -291,6 +141,7 @@ header{
 <div class="combatant">
 <div class="combat-avatar" id="player-combat-avatar">⚔️</div>
 <div class="combat-health"><div class="combat-health-fill" id="player-health-bar"></div></div>
+<div class="combat-health"><div class="combat-mana-fill" id="player-mana-bar"></div></div>
 <div id="player-combat-health">100/100</div>
 </div>
 <div>VS</div>
@@ -321,22 +172,24 @@ let character = {
     stats:{strength:5, agility:5, vitality:5, intellect:5, luck:5},
     xp:0,
     health:100,
+    maxHealth:100,
     mana:50,
+    maxMana:50,
     skillPoints:0,
     equipment:{weapon:null, armor:null},
 };
 
 const classSkills = {
-    warrior:[{name:'Удар мечом',icon:'⚔️'},{name:'Защитная стойка',icon:'🛡️'}],
-    mage:[{name:'Огненный шар',icon:'🔥'},{name:'Ледяной щит',icon:'🧊'}],
-    archer:[{name:'Выстрел',icon:'🏹'},{name:'Скоростной выстрел',icon:'💨'}],
-    assassin:[{name:'Критический удар',icon:'🗡️'},{name:'Скрытность',icon:'🕵️‍♂️'}]
+    warrior:[{name:'Удар мечом',icon:'⚔️',power:10},{name:'Защитная стойка',icon:'🛡️',power:0,def:true}],
+    mage:[{name:'Огненный шар',icon:'🔥',power:12},{name:'Ледяной щит',icon:'🧊',power:0,def:true}],
+    archer:[{name:'Выстрел',icon:'🏹',power:8},{name:'Скоростной выстрел',icon:'💨',power:12}],
+    assassin:[{name:'Критический удар',icon:'🗡️',power:15},{name:'Скрытность',icon:'🕵️‍♂️',power:0,def:true}]
 };
 
 const monsters = [
-    {name:'Скелет',health:30,icon:'💀'},
-    {name:'Гоблин',health:40,icon:'👹'},
-    {name:'Орк',health:60,icon:'👺'},
+    {name:'Скелет',health:30,icon:'💀',attack:5},
+    {name:'Гоблин',health:40,icon:'👹',attack:7},
+    {name:'Орк',health:60,icon:'👺',attack:10},
 ];
 
 const locations = [
@@ -344,6 +197,8 @@ const locations = [
     {name:'Пещера',levels:5},
     {name:'Замок',levels:5}
 ];
+
+let currentEnemy = null;
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -361,6 +216,7 @@ document.querySelectorAll('.class-option').forEach(c=>{
         character.class = c.dataset.class;
         document.getElementById('header-name').textContent = character.class;
         renderSkills();
+        document.getElementById('character-base').textContent = getClassIcon(character.class);
     });
 });
 
@@ -403,6 +259,11 @@ function renderStats(){
     document.getElementById('intellect-value').textContent = character.stats.intellect;
     document.getElementById('luck-value').textContent = character.stats.luck;
     document.getElementById('gold-amount').textContent = character.gold;
+
+    // Обновление полос
+    document.getElementById('health-bar').style.width = (character.health/character.maxHealth*100)+'%';
+    document.getElementById('mana-bar').style.width = (character.mana/character.maxMana*100)+'%';
+    document.getElementById('xp-bar').style.width = (character.xp/100*100)+'%';
 }
 
 document.querySelectorAll('.upgrade-btn').forEach(btn=>{
@@ -436,7 +297,7 @@ function renderLocations(){
             const btn = document.createElement('button');
             btn.textContent = 'Уровень '+i;
             btn.classList.add('combat-btn');
-            btn.addEventListener('click',()=>startCombat(monsters[Math.floor(Math.random()*monsters.length)]));
+            btn.addEventListener('click',()=>startCombat(JSON.parse(JSON.stringify(monsters[Math.floor(Math.random()*monsters.length)]))));
             div.appendChild(btn);
         }
         grid.appendChild(div);
@@ -444,24 +305,55 @@ function renderLocations(){
 }
 
 function startCombat(monster){
+    currentEnemy = monster;
+    document.querySelector('#combat').classList.add('active');
     document.getElementById('player-combat-avatar').textContent = getClassIcon(character.class);
     document.getElementById('enemy-combat-avatar').textContent = monster.icon;
-    document.getElementById('player-health-bar').style.width='100%';
-    document.getElementById('enemy-health-bar').style.width='100%';
-    document.getElementById('player-combat-health').textContent = character.health+'/'+character.health;
-    document.getElementById('enemy-combat-health').textContent = monster.health+'/'+monster.health;
 
-    const attackBtn = document.getElementById('attack-btn');
-    attackBtn.onclick = ()=>{
-        monster.health-=character.stats.strength*2;
-        if(monster.health<0) monster.health=0;
-        document.getElementById('enemy-combat-health').textContent = monster.health+'/'+monster.health;
-        document.getElementById('enemy-health-bar').style.width = (monster.health/monster.health*100)+'%';
-        if(monster.health<=0){
-            alert('Монстр побежден!');
-            gainXP(50);
-        }
-    };
+    updateCombatBars();
+
+    document.getElementById('attack-btn').onclick = ()=>playerAttack();
+    document.getElementById('skill-btn').onclick = ()=>useSkill();
+    document.getElementById('flee-btn').onclick = ()=>{alert('Вы убежали!'); currentEnemy=null;};
+}
+
+function updateCombatBars(){
+    document.getElementById('player-combat-health').textContent = character.health+'/'+character.maxHealth;
+    document.getElementById('player-health-bar').style.width = (character.health/character.maxHealth*100)+'%';
+    document.getElementById('player-mana-bar').style.width = (character.mana/character.maxMana*100)+'%';
+    document.getElementById('enemy-combat-health').textContent = currentEnemy.health+'/'+currentEnemy.health;
+    document.getElementById('enemy-health-bar').style.width = (currentEnemy.health/currentEnemy.health*100)+'%';
+}
+
+function playerAttack(){
+    let dmg = character.stats.strength*2;
+    currentEnemy.health-=dmg;
+    if(currentEnemy.health<0) currentEnemy.health=0;
+    document.getElementById('enemy-combat-health').textContent = currentEnemy.health+'/'+currentEnemy.health;
+    document.getElementById('enemy-health-bar').style.width = (currentEnemy.health/currentEnemy.health*100)+'%';
+    if(currentEnemy.health<=0){alert('Монстр побежден!'); gainXP(50); currentEnemy=null; return;}
+    setTimeout(enemyAttack,500);
+}
+
+function useSkill(){
+    let skill = classSkills[character.class][0];
+    if(character.mana>=5){
+        character.mana-=5;
+        currentEnemy.health-=skill.power;
+        if(currentEnemy.health<0) currentEnemy.health=0;
+        alert('Вы использовали '+skill.name+' и нанесли '+skill.power+' урона!');
+        updateCombatBars();
+        if(currentEnemy.health<=0){alert('Монстр побежден!'); gainXP(50); currentEnemy=null; return;}
+        setTimeout(enemyAttack,500);
+    }else alert('Недостаточно маны');
+}
+
+function enemyAttack(){
+    if(!currentEnemy) return;
+    character.health-=currentEnemy.attack;
+    if(character.health<0) character.health=0;
+    updateCombatBars();
+    if(character.health<=0){alert('Вы погибли!'); resetCharacter();}
 }
 
 function gainXP(amount){
@@ -481,6 +373,12 @@ function showLevelUp(){
     setTimeout(()=>div.style.display='none',3000);
 }
 
+function resetCharacter(){
+    character.health=character.maxHealth;
+    character.mana=character.maxMana;
+    renderStats();
+    currentEnemy=null;
+}
 </script>
 </body>
 </html>
