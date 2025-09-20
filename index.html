@@ -16,7 +16,6 @@
     --mana: #6366f1;
     --xp: #10b981;
     --gold: #f59e0b;
-    --locked: #475569;
 }
 * {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
 body {background: var(--dark-bg); color: var(--text); min-height: 100vh; padding: 20px;}
@@ -77,6 +76,9 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 .item-slot.empty::before {content:"+"; font-size:1.5rem; color: var(--text-muted);}
 .item-icon {font-size:2rem;}
 .start-button {display:block; width:100%; padding:15px; background: var(--accent); color:white; border:none; border-radius:8px; font-size:1.2rem; font-weight:bold; cursor:pointer; margin-top:30px;}
+.battle-panel {background: var(--panel-bg); padding:20px; border-radius:12px; margin-top:20px;}
+.battle-panel button {padding:10px 20px; margin-top:10px; background: var(--accent); border:none; color:white; cursor:pointer; border-radius:6px;}
+#zone-select {margin-top:15px; padding:10px; border-radius:8px; background: rgba(30,41,59,0.7); border:2px solid #334155; color:white;}
 </style>
 </head>
 <body>
@@ -89,7 +91,7 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 <div class="character-armor" id="character-armor"></div>
 </div>
 <div class="header-text">
-<h1 id="header-name">Ассасин</h1>
+<h1 id="header-name">Персонаж</h1>
 <div id="header-level">Уровень 1</div>
 </div>
 </div>
@@ -101,6 +103,7 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 <button class="tab-btn" data-tab="stats">Характеристики</button>
 <button class="tab-btn" data-tab="skills">Умения</button>
 <button class="tab-btn" data-tab="inventory">Инвентарь</button>
+<button class="tab-btn" data-tab="battle">Битвы</button>
 </div>
 
 <div class="tab-content active" id="creation">
@@ -112,7 +115,10 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 <input type="text" id="nickname" placeholder="Введите имя">
 </div>
 <div class="class-grid">
-<div class="class-option selected" data-class="assassin">🖤<br>Ассасин</div>
+<div class="class-option selected" data-class="assassin" data-weapon="🗡️" data-armor="🖤">🖤<br>Ассасин</div>
+<div class="class-option" data-class="warrior" data-weapon="🪓" data-armor="🛡️">🪓<br>Воин</div>
+<div class="class-option" data-class="mage" data-weapon="🔮" data-armor="🧙">🔮<br>Маг</div>
+<div class="class-option" data-class="archer" data-weapon="🏹" data-armor="🦺">🏹<br>Лучник</div>
 </div>
 <h2>Выбор пола</h2>
 <div class="gender-grid">
@@ -168,7 +174,7 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 </div>
 
 <div class="tab-content" id="skills">
-<h3>Умения Ассасина</h3>
+<h3>Умения персонажа</h3>
 <ul id="skill-list"></ul>
 </div>
 
@@ -180,6 +186,18 @@ header {text-align:center; margin-bottom:20px; padding:20px; background: var(--p
 <div class="item-slot empty" data-type="weapon"></div>
 <div class="item-slot empty" data-type="armor"></div>
 <div class="item-slot empty" data-type="weapon"></div>
+</div>
+</div>
+
+<div class="tab-content" id="battle">
+<h3>Сражения с монстрами</h3>
+<select id="zone-select">
+<option value="forest">🌲 Лес 1–5</option>
+<option value="dungeon">🕳 Подземелье 1–5</option>
+</select>
+<div class="battle-panel" id="battle-panel">
+<button id="start-battle">Начать бой с монстром</button>
+<div id="battle-log" style="margin-top:15px;"></div>
 </div>
 </div>
 
@@ -200,12 +218,16 @@ const classOptions = document.querySelectorAll('.class-option');
 const genderOptions = document.querySelectorAll('.gender-option');
 let selectedClass = 'assassin';
 let selectedGender = 'male';
+let selectedWeapon = '🗡️';
+let selectedArmor = '🖤';
 
 classOptions.forEach(option=>{
     option.addEventListener('click', ()=>{
         classOptions.forEach(o=>o.classList.remove('selected'));
         option.classList.add('selected');
         selectedClass = option.dataset.class;
+        selectedWeapon = option.dataset.weapon;
+        selectedArmor = option.dataset.armor;
         document.getElementById('character-avatar').textContent = option.textContent.split('\n')[0];
         document.getElementById('character-base').textContent = option.textContent.split('\n')[0];
     });
@@ -220,7 +242,7 @@ genderOptions.forEach(option=>{
 });
 
 const character = {
-    name:'Ассасин',
+    name:'Персонаж',
     class:'assassin',
     gender:'male',
     level:1,
@@ -230,8 +252,28 @@ const character = {
     hp:100,
     mana:50,
     skills:['Удар в спину','Тень','Отравленный клинок','Тихий шаг','Смертельный выпад'],
-    weapon:'',
-    armor:''
+    weapon:selectedWeapon,
+    armor:selectedArmor
+};
+
+const classSkills = {
+    assassin:['Удар в спину','Тень','Отравленный клинок','Тихий шаг','Смертельный выпад'],
+    warrior:['Сильный удар','Щитовая защита','Боевой клич','Вихрь','Рывок'],
+    mage:['Огненный шар','Ледяной щит','Магический взрыв','Исцеляющий свет','Телепортация'],
+    archer:['Стрела в сердце','Многозарядная стрела','Ловкость','Точный выстрел','Маскировка']
+};
+
+const zones = {
+    forest:[
+        {name:'Скелет', hp:30, str:3, xp:10, gold:5},
+        {name:'Гоблин', hp:50, str:5, xp:20, gold:10},
+        {name:'Волк', hp:40, str:4, xp:15, gold:8}
+    ],
+    dungeon:[
+        {name:'Подземный Скелет', hp:60, str:6, xp:30, gold:15},
+        {name:'Огромный Гоблин', hp:80, str:8, xp:40, gold:20},
+        {name:'Тролль', hp:100, str:10, xp:50, gold:25}
+    ]
 };
 
 function updateStats(){
@@ -243,6 +285,11 @@ function updateStats(){
     document.getElementById('mana-bar').style.width = character.mana+'%';
     document.getElementById('xp-value').textContent = character.xp;
     document.getElementById('xp-bar').style.width = character.xp+'%';
+    document.getElementById('gold-amount').textContent = character.gold;
+    document.getElementById('weapon-slot').textContent = character.weapon;
+    document.getElementById('armor-slot').textContent = character.armor;
+    document.getElementById('header-name').textContent = character.name;
+    document.getElementById('header-level').textContent = 'Уровень '+character.level;
 }
 
 document.getElementById('create-character').addEventListener('click', ()=>{
@@ -250,6 +297,9 @@ document.getElementById('create-character').addEventListener('click', ()=>{
     character.name = nickname;
     character.class = selectedClass;
     character.gender = selectedGender;
+    character.weapon = selectedWeapon;
+    character.armor = selectedArmor;
+    character.skills = classSkills[selectedClass];
     const skillList = document.getElementById('skill-list');
     skillList.innerHTML='';
     character.skills.forEach(skill=>{
@@ -260,27 +310,34 @@ document.getElementById('create-character').addEventListener('click', ()=>{
     alert('Персонаж создан!');
 });
 
-document.getElementById('upgrade-str').addEventListener('click', ()=>{character.stats.str++; updateStats();});
-document.getElementById('upgrade-agi').addEventListener('click', ()=>{character.stats.agi++; updateStats();});
-document.getElementById('upgrade-vit').addEventListener('click', ()=>{character.stats.vit++; updateStats();});
-document.getElementById('upgrade-int').addEventListener('click', ()=>{character.stats.int++; updateStats();});
-
-const inventorySlots = document.querySelectorAll('.item-slot');
-inventorySlots.forEach(slot=>{
-    slot.addEventListener('click', ()=>{
-        if(slot.classList.contains('empty')){
-            slot.classList.remove('empty');
-            slot.classList.add('equipped');
-            slot.innerHTML = slot.dataset.type==='weapon' ? '🗡️' : '🛡️';
-            // отображение на персонаже
-            if(slot.dataset.type==='weapon') document.getElementById('character-weapon').textContent = '🗡️';
-            else document.getElementById('character-armor').textContent = '🛡️';
-        }else{
-            slot.classList.add('empty'); slot.classList.remove('equipped'); slot.innerHTML='';
-            if(slot.dataset.type==='weapon') document.getElementById('character-weapon').textContent='';
-            else document.getElementById('character-armor').textContent='';
+document.getElementById('start-battle').addEventListener('click', ()=>{
+    const selectedZone = document.getElementById('zone-select').value;
+    const monster = zones[selectedZone][Math.floor(Math.random()*zones[selectedZone].length)];
+    const battleLog = document.getElementById('battle-log');
+    battleLog.innerHTML = `<b>Начало боя с ${monster.name}!</b><br>`;
+    let monsterHp = monster.hp;
+    const interval = setInterval(()=>{
+        let damage = character.stats.str + Math.floor(Math.random()*5);
+        monsterHp -= damage;
+        battleLog.innerHTML += `Вы наносите ${damage} урона. Осталось HP монстра: ${Math.max(monsterHp,0)}<br>`;
+        if(monsterHp <=0){
+            battleLog.innerHTML += `<b>Монстр повержен! +${monster.xp} XP, +${monster.gold} золота</b><br>`;
+            character.xp += monster.xp;
+            character.gold += monster.gold;
+            updateStats();
+            clearInterval(interval);
+            return;
         }
-    });
+        let mDamage = monster.str + Math.floor(Math.random()*3);
+        character.hp -= mDamage;
+        battleLog.innerHTML += `${monster.name} наносит ${mDamage} урона. Ваш HP: ${Math.max(character.hp,0)}<br>`;
+        if(character.hp <=0){
+            battleLog.innerHTML += `<b>Вы проиграли!</b><br>`;
+            character.hp = 50;
+            updateStats();
+            clearInterval(interval);
+        }
+    },1000);
 });
 </script>
 </body>
