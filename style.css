@@ -1,32 +1,55 @@
-body {
-    margin:0;
-    font-family: Arial, sans-serif;
-    background-color: #222;
-    color: #fff;
+:root{
+  --bg:#0f1220;
+  --panel:#161826;
+  --accent:#4CAF50;
+  --muted:#9aa0b0;
+  --common:#666;
+  --rare:#4aa3ff;
+  --epic:#b84aff;
+  --legend:#ffcc00;
 }
-
-#game-container {
-    max-width: 480px;
-    margin: auto;
-    padding: 5px;
-    text-align: center;
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Inter,Segoe UI,Arial; background:var(--bg); color:#f3f4f6;
 }
+.wrap{max-width:980px;margin:12px auto;padding:12px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+header h1{margin:0;font-size:20px}
+.top-controls select, .top-controls button{margin-left:8px;padding:6px 8px;border-radius:6px;border:1px solid #2a2f3f;background:#111;color:#fff}
+.main-grid{display:grid;grid-template-columns:1fr 420px;gap:12px}
+.panel{background:var(--panel);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+.small{font-size:13px}
+.char-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.char-body{display:flex;gap:12px;align-items:center}
+.char-portrait{width:120px;height:120px;background:linear-gradient(180deg,#222,#111);border-radius:8px;border:1px solid #272b3a}
+.stats-panel{flex:1}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #222;font-size:14px}
+.stat-row button{background:transparent;border:1px solid #2a2f3f;color:var(--muted);padding:4px 6px;border-radius:6px;cursor:pointer}
+.equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.slot{background:#0b0c12;border:1px solid #2a2f3f;height:70px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--muted);font-weight:700}
+.slot img{max-width:64px;max-height:64px;display:block}
+.inventory-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.inv-item{background:#06070a;border-radius:8px;border:2px solid #222;height:74px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;overflow:hidden}
+.inv-item img{width:56px;height:56px;object-fit:contain}
+.inv-item .lvl-badge{position:absolute;left:6px;top:6px;background:#0007;padding:2px 6px;border-radius:6px;font-size:12px}
+.inv-item .rarity-tag{position:absolute;right:6px;top:6px;padding:2px 6px;border-radius:6px;font-size:11px;color:#000}
+.legend{margin-top:8px;font-size:13px;color:var(--muted)}
+.rarity.common{background:var(--common);display:inline-block;width:14px;height:14px;border-radius:3px;margin:0 8px}
+.rarity.rare{background:var(--rare);display:inline-block;width:14px;height:14px;border-radius:3px;margin:0 8px}
+.rarity.epic{background:var(--epic);display:inline-block;width:14px;height:14px;border-radius:3px;margin:0 8px}
+.rarity.legendary{background:var(--legend);display:inline-block;width:14px;height:14px;border-radius:3px;margin:0 8px}
 
-button {
-    width: 45%;
-    margin: 5px 2%;
-    padding: 10px;
-    font-size: 16px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    background-color:#444;
-    color:#fff;
+/* skill tree */
+.skill-tree{display:flex;flex-direction:column;gap:10px}
+.skill-node{background:#0b0c12;border:1px solid #232632;padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.skill-node.locked{opacity:0.35}
+.skill-node button{background:var(--accent);border:none;padding:6px 8px;border-radius:6px;color:#072}
+
+/* log */
+#log{font-size:13px;color:var(--muted)}
+
+/* responsive */
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr; }
+  .inventory-grid{grid-template-columns:repeat(4,1fr)}
 }
-
-button:hover { background-color:#666; }
-
-#map-container img { width:100%; }
-#character-container img { width:100px; margin:10px auto; display:block; }
-#inventory-items img { width:60px; height:60px; margin:2px; border:1px solid #fff; border-radius:5px; }
-#equipment p { font-size:14px; }

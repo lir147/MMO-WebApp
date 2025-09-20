@@ -1,63 +1,86 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MMO Game</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini-RPG — Inventory & Skills</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="game-container">
-    <!-- Выбор класса и пола -->
-    <div id="selection-screen">
-        <h2>Выберите персонажа</h2>
-        <button onclick="selectClass('warrior')">Воин</button>
-        <button onclick="selectClass('mage')">Маг</button>
-        <button onclick="selectClass('archer')">Лучник</button>
-        <button onclick="selectClass('assassin')">Ассасин</button>
-        <h3>Выберите пол</h3>
-        <button onclick="selectGender('male')">Мужской</button>
-        <button onclick="selectGender('female')">Женский</button>
-    </div>
+  <div class="wrap">
 
-    <!-- Игровой экран -->
-    <div id="game-screen" style="display:none">
-        <div id="player-info">
-            <h3 id="player-name"></h3>
-            <p>Уровень: <span id="player-level">1</span> | VIP: <span id="player-vip">0</span></p>
+    <header>
+      <h1>Mini-RPG</h1>
+      <div class="top-controls">
+        <label for="classSelect">Класс:</label>
+        <select id="classSelect"></select>
+        <button id="newFightBtn">Сразиться (рандом)</button>
+        <button id="addExpBtn">+50 XP (тест)</button>
+      </div>
+    </header>
+
+    <main class="main-grid">
+
+      <!-- Character / Stats / Equipment -->
+      <section class="panel" id="characterPanel">
+        <div class="char-top">
+          <div>
+            <h2 id="char-name">Воин</h2>
+            <div>Уровень: <b id="char-level">1</b> &nbsp; | &nbsp; XP: <b id="char-exp">0</b>/<b id="char-xp-next">100</b></div>
+          </div>
+          <div class="stat-points">Свободно очков: <b id="stat-points">5</b></div>
         </div>
 
-        <div id="map-container">
-            <img id="map-img" src="https://opengameart.org/sites/default/files/map_tile.png" alt="Map">
+        <div class="char-body">
+          <div class="char-portrait" id="char-portrait"></div>
+
+          <div class="stats-panel">
+            <div class="stat-row">HP: <span id="stat-hp"></span> <button onclick="alloc('hp')">+</button></div>
+            <div class="stat-row">MP: <span id="stat-mp"></span> <button onclick="alloc('mp')">+</button></div>
+            <div class="stat-row">STR: <span id="stat-str"></span> <button onclick="alloc('str')">+</button></div>
+            <div class="stat-row">AGI: <span id="stat-agi"></span> <button onclick="alloc('agi')">+</button></div>
+            <div class="stat-row">INT: <span id="stat-int"></span> <button onclick="alloc('int')">+</button></div>
+            <div class="stat-row">CRIT: <span id="stat-crit"></span> <button onclick="alloc('crit')">+</button></div>
+          </div>
         </div>
 
-        <div id="character-container">
-            <img id="character-img" src="" alt="Character">
+        <h3>Экипировка</h3>
+        <div class="equip-grid">
+          <div class="slot" id="weapon-slot" data-slot="weapon">Оружие</div>
+          <div class="slot" id="helmet-slot" data-slot="helmet">Шлем</div>
+          <div class="slot" id="armor-slot" data-slot="armor">Броня</div>
+          <div class="slot" id="pants-slot" data-slot="pants">Штаны</div>
+          <div class="slot" id="boots-slot" data-slot="boots">Ботинки</div>
+          <div class="slot" id="accessory-slot" data-slot="accessory">Аксессуар</div>
         </div>
+      </section>
 
-        <button onclick="fightMonster()">Сразиться с монстром</button>
-        <button onclick="donate()">Пополнить VIP</button>
-
-        <div id="inventory-container">
-            <h3>Инвентарь</h3>
-            <div id="inventory-items"></div>
-            <h3>Экипировка</h3>
-            <div id="equipment">
-                <p>Оружие: <span id="eq-weapon">—</span></p>
-                <p>Броня: <span id="eq-armor">—</span></p>
-                <p>Аксессуар: <span id="eq-accessory">—</span></p>
-            </div>
+      <!-- Inventory -->
+      <section class="panel" id="inventoryPanel">
+        <h3>Инвентарь</h3>
+        <div id="inventoryGrid" class="inventory-grid"></div>
+        <div class="legend">
+          <span class="rarity common"></span>Обычный
+          <span class="rarity rare"></span>Редкий
+          <span class="rarity epic"></span>Эпический
+          <span class="rarity legendary"></span>Легендарный
         </div>
+      </section>
 
-        <div id="skills-container">
-            <h3>Дерево навыков (очки: <span id="skill-points">0</span>)</h3>
-            <button onclick="upgradeSkill('strength')">Сила (+1)</button>
-            <button onclick="upgradeSkill('agility')">Ловкость (+1)</button>
-            <button onclick="upgradeSkill('intelligence')">Интеллект (+1)</button>
-            <button onclick="upgradeSkill('intelligence')">Выносливость (+1)</button>
-        </div>
-    </div>
-</div>
-<script src="app.js"></script>
+      <!-- Skills -->
+      <section class="panel" id="skillsPanel">
+        <h3>Древо умений</h3>
+        <div id="skillTree" class="skill-tree"></div>
+      </section>
+
+    </main>
+
+    <footer class="panel small">
+      <div id="log">Лог: готово.</div>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
