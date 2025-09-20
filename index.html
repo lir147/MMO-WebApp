@@ -3,277 +3,249 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPG Telegram WebApp</title>
+<title>Telegram Web RPG</title>
 <style>
-:root{--dark-bg:#0f172a;--panel-bg:#1e293b;--accent:#3b82f6;--accent-dark:#2563eb;--text:#f1f5f9;--text-muted:#94a3b8;--health:#ef4444;--mana:#6366f1;--xp:#10b981;--strength:#f59e0b;--agility:#10b981;--vitality:#ef4444;--intellect:#3b82f6;--locked:#475569;--gold:#f59e0b;--success:#10b981;--danger:#ef4444;}
-body{background:var(--dark-bg);color:var(--text);font-family:sans-serif;margin:0;padding:0;}
-.container{max-width:500px;margin:auto;padding:10px;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.character-info{display:flex;align-items:center;}
-.character-visual{width:80px;height:80px;background:var(--panel-bg);border-radius:10px;position:relative;margin-right:10px;}
-.header-text h1{margin:0;font-size:18px;}
-.gold-display{font-size:18px;}
-.tabs{display:flex;justify-content:space-around;margin-bottom:10px;}
-.tab-btn{background:var(--panel-bg);border:none;color:var(--text);padding:5px 10px;border-radius:5px;cursor:pointer;}
-.tab-btn.active{background:var(--accent);}
-.tab-content{display:none;}
+:root {
+    --dark-bg:#0f172a; --panel-bg:#1e293b; --accent:#3b82f6; --accent-dark:#2563eb;
+    --text:#f1f5f9; --text-muted:#94a3b8; --health:#ef4444; --mana:#6366f1; --xp:#10b981;
+    --gold:#f59e0b; --success:#10b981; --danger:#ef4444; --locked:#475569;
+}
+* {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body {background:var(--dark-bg);color:var(--text);min-height:100vh;padding:20px;}
+.container{max-width:1200px;margin:0 auto;}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px;background:var(--panel-bg);border-radius:12px;margin-bottom:15px;}
+.character-info{display:flex;align-items:center;gap:10px;}
+.character-visual{position:relative;width:60px;height:60px;background:rgba(30,41,59,0.7);border-radius:8px;display:flex;justify-content:center;align-items:center;}
+.character-base{width:40px;height:40px;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="%23f59e0b"/></svg>');background-size:contain;background-repeat:no-repeat;}
+.gold-display{display:flex;align-items:center;gap:5px;font-weight:bold;color:var(--gold);}
+.tabs{display:flex;margin-bottom:15px;background:var(--panel-bg);border-radius:8px;}
+.tab-btn{flex:1;padding:10px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.3s;font-weight:bold;}
+.tab-btn.active{background:var(--accent);color:white;}
+.tab-content{display:none;animation:fadeIn 0.3s;}
 .tab-content.active{display:block;}
-.inventory-grid,.skills-grid{display:flex;flex-wrap:wrap;gap:5px;}
-.item-slot{background:var(--panel-bg);padding:5px;border-radius:5px;cursor:pointer;}
-.start-button{background:var(--accent);border:none;color:#fff;padding:5px 10px;border-radius:5px;cursor:pointer;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.creation-panel, .stats-panel, .inventory-panel, .skills-container, .tavern-panel, .location-panel, .combat-screen, .loot-screen{background:var(--panel-bg);padding:15px;border-radius:8px;margin-bottom:15px;}
+.class-grid, .gender-grid, .skills-grid, .inventory-grid, .shop-items, .blacksmith-items, .locations-grid{display:grid;gap:10px;}
+.class-grid, .gender-grid{grid-template-columns:repeat(2,1fr);}
+.skills-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+.inventory-grid{grid-template-columns:repeat(5,1fr);}
+.locations-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));}
+.class-option, .gender-option, .item-slot, .skill-card, .shop-item, .blacksmith-item, .location{background:rgba(30,41,59,0.7);border-radius:6px;padding:10px;text-align:center;cursor:pointer;transition:all 0.3s;}
+.class-option.selected, .gender-option.selected, .item-slot.equipped{border:2px solid var(--accent);}
+.upgrade-btn,.combat-btn,.buy-btn,.sell-btn,.craft-btn,.dismantle-btn{background:var(--accent);color:white;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;}
+.upgrade-btn:disabled,.combat-btn:disabled,.buy-btn:disabled,.sell-btn:disabled,.craft-btn:disabled,.dismantle-btn:disabled{background:var(--locked);cursor:not-allowed;}
+.resource-bar{margin-bottom:10px;}
+.bar{height:20px;background:#334155;border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;transition:width 0.3s;}
+.health .bar-fill{background:var(--health);}
+.mana .bar-fill{background:var(--mana);}
+.xp .bar-fill{background:var(--xp);}
+.combat-log{background:rgba(30,41,59,0.7);padding:10px;border-radius:6px;max-height:150px;overflow-y:auto;}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-<div class="character-info">
-<div class="character-visual">
-<div class="character-base" id="character-base"></div>
-<div class="character-weapon" id="character-weapon"></div>
-<div class="character-armor" id="character-armor"></div>
-</div>
-<div class="header-text">
-<h1 id="header-name">Воин</h1>
-<div id="header-level">Уровень 1</div>
-</div>
-</div>
-<div class="gold-display"><span>🪙</span><span id="gold-amount">50</span></div>
+    <div class="character-info">
+        <div class="character-visual">
+            <div class="character-base" id="character-base"></div>
+        </div>
+        <div class="header-text">
+            <h1 id="header-name">Воин</h1>
+            <div id="header-level">Уровень 1</div>
+        </div>
+    </div>
+    <div class="gold-display">
+        🪙 <span id="gold-amount">50</span>
+    </div>
 </header>
 
 <div class="tabs">
-<button class="tab-btn active" data-tab="stats">Характеристики</button>
-<button class="tab-btn" data-tab="skills">Умения</button>
-<button class="tab-btn" data-tab="inventory">Инвентарь</button>
-<button class="tab-btn" data-tab="combat">Бой</button>
-<button class="tab-btn" data-tab="tavern">Таверна</button>
+    <button class="tab-btn active" data-tab="creation">Создание</button>
+    <button class="tab-btn" data-tab="stats">Характеристики</button>
+    <button class="tab-btn" data-tab="skills">Умения</button>
+    <button class="tab-btn" data-tab="tavern">Таверна</button>
+    <button class="tab-btn" data-tab="location">Локации</button>
 </div>
 
-<div class="tab-content active" id="stats">
-<h2>Характеристики</h2>
-<div id="stats-container"></div>
+<!-- --- Создание персонажа --- -->
+<div class="tab-content active" id="creation">
+    <div class="creation-panel">
+        <h2>Выбор класса</h2>
+        <input type="text" id="nickname" placeholder="Имя персонажа">
+        <div class="class-grid">
+            <div class="class-option selected" data-class="warrior">⚔️ Воин</div>
+            <div class="class-option" data-class="mage">🧙 Маг</div>
+            <div class="class-option" data-class="archer">🏹 Лучник</div>
+            <div class="class-option" data-class="rogue">🗡️ Разбойник</div>
+        </div>
+    </div>
+    <div class="creation-panel">
+        <h2>Выбор пола</h2>
+        <div class="gender-grid">
+            <div class="gender-option selected" data-gender="male">👨 Мужской</div>
+            <div class="gender-option" data-gender="female">👩 Женский</div>
+        </div>
+    </div>
 </div>
 
+<!-- --- Характеристики --- -->
+<div class="tab-content" id="stats">
+    <div class="stats-panel">
+        <h2>Характеристики</h2>
+        <div class="resource-bar health"><div class="bar"><div class="bar-fill" id="health-bar" style="width:100%"></div></div></div>
+        <div class="resource-bar mana"><div class="bar"><div class="bar-fill" id="mana-bar" style="width:100%"></div></div></div>
+        <div class="resource-bar xp"><div class="bar"><div class="bar-fill" id="xp-bar" style="width:0%"></div></div></div>
+        <div>Сила: <span id="strength-value">5</span> <button class="upgrade-btn" data-stat="strength">+</button></div>
+        <div>Ловкость: <span id="agility-value">5</span> <button class="upgrade-btn" data-stat="agility">+</button></div>
+        <div>Интеллект: <span id="intellect-value">5</span> <button class="upgrade-btn" data-stat="intellect">+</button></div>
+        <div>Живучесть: <span id="vitality-value">5</span> <button class="upgrade-btn" data-stat="vitality">+</button></div>
+    </div>
+    <div class="inventory-panel">
+        <h2>Рюкзак</h2>
+        <div class="inventory-grid" id="inventory">
+            <div class="item-slot empty"></div><div class="item-slot empty"></div>
+            <div class="item-slot empty"></div><div class="item-slot empty"></div>
+            <div class="item-slot empty"></div><div class="item-slot empty"></div>
+            <div class="item-slot empty"></div><div class="item-slot empty"></div>
+            <div class="item-slot empty"></div><div class="item-slot empty"></div>
+        </div>
+    </div>
+</div>
+
+<!-- --- Умения --- -->
 <div class="tab-content" id="skills">
-<h2>Умения</h2>
-<div id="skills-grid"></div>
+    <div class="skills-container">
+        <h2>Умения</h2>
+        <div class="skills-grid" id="skills-grid"></div>
+    </div>
 </div>
 
-<div class="tab-content" id="inventory">
-<h2>Инвентарь</h2>
-<div class="inventory-grid" id="inventory-grid"></div>
-</div>
-
-<div class="tab-content" id="combat">
-<h2>Бой</h2>
-<div id="enemy-info"></div>
-<button class="start-button" id="attack-btn">Атаковать</button>
-<div id="combat-log" style="margin-top:10px; color:#fff;"></div>
-</div>
-
+<!-- --- Таверна --- -->
 <div class="tab-content" id="tavern">
-<h2>Таверна</h2>
-<button class="start-button" id="visit-tavern-btn">Посетить таверну</button>
-<div id="tavern-log" style="margin-top:10px; color:#fff;"></div>
+    <div class="tavern-panel">
+        <h2>Таверна "У Гнома"</h2>
+        <div class="shop-items" id="shop-items"></div>
+        <div class="blacksmith-items" id="upgrade-items"></div>
+    </div>
 </div>
+
+<!-- --- Локации --- -->
+<div class="tab-content" id="location">
+    <div class="location-panel">
+        <h2>Мир Эмона</h2>
+        <div class="locations-grid" id="locations-grid"></div>
+    </div>
+</div>
+
+<!-- --- Бой --- -->
+<div class="tab-content" id="combat">
+    <div class="combat-screen">
+        <div class="combat-log" id="combat-log"></div>
+        <div class="combat-actions">
+            <button class="combat-btn" id="attack-btn">Атака</button>
+            <button class="combat-btn" id="skill-btn">Умение</button>
+        </div>
+    </div>
+</div>
+
+<!-- --- Добыча --- -->
+<div class="tab-content" id="loot">
+    <div class="loot-screen">
+        <h2>Добыча</h2>
+        <div class="loot-items" id="loot-items"></div>
+    </div>
+</div>
+
 </div>
 
 <script>
-// --- Character ---
-let character = {
-    name: "Воин",
-    class: "warrior",
-    level: 1,
-    health: 100,
-    maxHealth: 100,
-    mana: 50,
-    maxMana: 50,
-    xp: 0,
-    xpToNext: 100,
-    gold: 50,
-    strength: 10,
-    agility: 10,
-    vitality: 10,
-    intellect: 10,
-    inventory: [],
-    equipment: {weapon:null, armor:null},
-    skills: [
-        {name:"Удар", level:1, maxLevel:5},
-        {name:"Защита", level:1, maxLevel:5}
-    ]
+// --- Character Data ---
+const character = {
+    name:"Воин", level:1, gold:50, health:100, mana:50, xp:0,
+    strength:5, agility:5, intellect:5, vitality:5,
+    inventory:[]
 };
 
-// --- Items ---
+// --- Items with rarity ---
 const items = [
-    {id:1,name:"Меч",type:"weapon",attack:5,value:20},
-    {id:2,name:"Лук",type:"weapon",attack:3,value:15},
-    {id:3,name:"Броня",type:"armor",defense:5,value:25},
-    {id:4,name:"Мана Пот",type:"consumable",mana:20,value:10},
-    {id:5,name:"Зелье здоровья",type:"consumable",health:30,value:15}
+    {id:1,name:"Меч",type:"weapon",attack:5,value:20,rarity:"common"},
+    {id:2,name:"Лук",type:"weapon",attack:3,value:15,rarity:"common"},
+    {id:3,name:"Броня",type:"armor",defense:5,value:25,rarity:"common"},
+    {id:4,name:"Зелье маны",type:"consumable",mana:20,value:10,rarity:"common"},
+    {id:5,name:"Зелье здоровья",type:"consumable",health:30,value:15,rarity:"common"},
+    {id:6,name:"Редкий Меч",type:"weapon",attack:10,value:50,rarity:"rare"},
+    {id:7,name:"Редкая Броня",type:"armor",defense:12,value:60,rarity:"rare"},
+    {id:8,name:"Эпический Лук",type:"weapon",attack:18,value:120,rarity:"epic"},
+    {id:9,name:"Легендарный Амулет",type:"armor",defense:25,value:300,rarity:"legendary"}
 ];
-
-// --- Enemy types ---
-const enemies = [
-    {name:"Гоблин",health:30,attack:5,xp:20,gold:10},
-    {name:"Скелет",health:40,attack:7,xp:30,gold:15},
-    {name:"Огр",health:60,attack:12,xp:50,gold:25},
-    {name:"Дракончик",health:100,attack:20,xp:100,gold:50}
-];
-
-let enemy = spawnEnemy();
 
 // --- Tabs ---
 document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
-        document.getElementById(btn.dataset.tab).classList.add('active');
-        renderAll();
-    });
+    btn.addEventListener('click',()=>{openTab(btn.dataset.tab)});
 });
+function openTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+document.getElementById(tab).classList.add('active');}
 
-// --- Render functions ---
-function renderStats(){
-    document.getElementById('stats-container').innerHTML = `
-        <p>Уровень: ${character.level}</p>
-        <p>Здоровье: ${character.health}/${character.maxHealth}</p>
-        <p>Мана: ${character.mana}/${character.maxMana}</p>
-        <p>Сила: ${character.strength}</p>
-        <p>Ловкость: ${character.agility}</p>
-        <p>Выносливость: ${character.vitality}</p>
-        <p>Интеллект: ${character.intellect}</p>
-        <p>Золото: ${character.gold}</p>
-    `;
-}
+// --- Creation ---
+document.querySelectorAll('.class-option').forEach(c=>{
+    c.addEventListener('click',()=>{document.querySelectorAll('.class-option').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');character.name=c.dataset.class;updateHeader();});
+});
+document.querySelectorAll('.gender-option').forEach(g=>{
+    g.addEventListener('click',()=>{document.querySelectorAll('.gender-option').forEach(x=>x.classList.remove('selected'));g.classList.add('selected');});
+});
+document.getElementById('nickname').addEventListener('input',e=>{character.name=e.target.value;updateHeader();});
+function updateHeader(){document.getElementById('header-name').textContent=character.name;}
 
-function renderSkills(){
-    const container = document.getElementById('skills-grid');
-    container.innerHTML="";
-    character.skills.forEach((s,i)=>{
-        const div = document.createElement('div');
-        div.textContent = `${s.name} (Уровень ${s.level}) `;
-        const btn = document.createElement('button');
-        btn.textContent="Улучшить";
-        btn.disabled = s.level >= s.maxLevel;
-        btn.addEventListener('click',()=>{
-            if(s.level<s.maxLevel){s.level++; renderSkills();}
-        });
-        div.appendChild(btn);
-        container.appendChild(div);
-    });
-}
-
+// --- Inventory ---
 function renderInventory(){
-    const container = document.getElementById('inventory-grid');
-    container.innerHTML="";
-    character.inventory.forEach(item=>{
-        const slot = document.createElement('div');
-        slot.className="item-slot";
-        slot.textContent = item.name;
-        slot.addEventListener('click',()=>useItem(item));
-        container.appendChild(slot);
+    const inv = document.getElementById('inventory');
+    inv.innerHTML = '';
+    for(let i=0;i<10;i++){
+        const slot = document.createElement('div');slot.classList.add('item-slot');
+        if(character.inventory[i]){slot.textContent = character.inventory[i].name;slot.classList.add('equipped');}
+        else slot.classList.add('empty');
+        inv.appendChild(slot);
+    }
+}
+
+// --- Stats Upgrade ---
+document.querySelectorAll('.upgrade-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+        const stat = b.dataset.stat;
+        if(character.gold>=10){character[stat]+=1;character.gold-=10;updateStats();}
     });
-}
-
-function useItem(item){
-    if(item.type==="consumable"){
-        if(item.mana) character.mana = Math.min(character.mana+item.mana,character.maxMana);
-        if(item.health) character.health = Math.min(character.health+item.health,character.maxHealth);
-        alert(`${item.name} использован`);
-        character.inventory = character.inventory.filter(i=>i.id!==item.id);
-        renderInventory();
-    }else if(item.type==="weapon" || item.type==="armor"){
-        character.equipment[item.type] = item;
-        alert(`${item.name} экипирован`);
-        renderAll();
-    }
-}
-
-// --- Combat ---
-function renderEnemy(){
-    document.getElementById('enemy-info').textContent = `${enemy.name} HP: ${enemy.health}`;
-}
-document.getElementById('attack-btn').addEventListener('click',()=>{
-    const dmg = character.strength + (character.equipment.weapon?.attack||0);
-    enemy.health -= dmg;
-    const log = document.getElementById('combat-log');
-    log.innerHTML += `<p>Вы нанесли ${dmg} урона!</p>`;
-    if(enemy.health>0){
-        character.health -= enemy.attack;
-        log.innerHTML += `<p>${enemy.name} нанес ${enemy.attack} урона!</p>`;
-    }else{
-        log.innerHTML += `<p>${enemy.name} повержен! Вы получаете ${enemy.xp} XP и ${enemy.gold} золота.</p>`;
-        character.xp += enemy.xp;
-        character.gold += enemy.gold;
-        dropLoot();
-        enemy = spawnEnemy();
-        levelUpCheck();
-    }
-    renderStats();
-    renderEnemy();
 });
-
-function spawnEnemy(){
-    return JSON.parse(JSON.stringify(enemies[Math.floor(Math.random()*enemies.length)]));
+function updateStats(){
+    document.getElementById('strength-value').textContent=character.strength;
+    document.getElementById('agility-value').textContent=character.agility;
+    document.getElementById('intellect-value').textContent=character.intellect;
+    document.getElementById('vitality-value').textContent=character.vitality;
+    document.getElementById('gold-amount').textContent=character.gold;
 }
 
-// --- Loot drops ---
+// --- Loot Drop ---
 function dropLoot(){
-    if(Math.random()<0.5){
-        const loot = items[Math.floor(Math.random()*items.length)];
-        character.inventory.push(loot);
-        const log = document.getElementById('combat-log');
-        log.innerHTML += `<p>Вы нашли предмет: ${loot.name}!</p>`;
-        renderInventory();
-    }
-}
-
-// --- Tavern events ---
-document.getElementById('visit-tavern-btn').addEventListener('click',()=>{
-    const log = document.getElementById('tavern-log');
-    const event = Math.random();
-    if(event<0.4){
-        const goldFound = Math.floor(Math.random()*20)+5;
-        character.gold += goldFound;
-        log.innerHTML += `<p>Вы нашли в таверне ${goldFound} золота!</p>`;
-    } else if(event<0.7){
-        const item = items[Math.floor(Math.random()*items.length)];
-        character.inventory.push(item);
-        log.innerHTML += `<p>Вы купили предмет: ${item.name}!</p>`;
-        renderInventory();
-    } else{
-        const goldLost = Math.min(character.gold,Math.floor(Math.random()*15)+5);
-        character.gold -= goldLost;
-        log.innerHTML += `<p>Вы проиграли ${goldLost} золота в таверне!</p>`;
-    }
-    renderStats();
-});
-
-// --- Level up ---
-function levelUpCheck(){
-    while(character.xp>=character.xpToNext){
-        character.level++;
-        character.xp -= character.xpToNext;
-        character.xpToNext = Math.floor(character.xpToNext*1.5);
-        character.maxHealth+=10;
-        character.health = character.maxHealth;
-        character.maxMana+=5;
-        character.mana = character.maxMana;
-        alert("🎉 Вы повысили уровень!");
-    }
-}
-
-// --- Render all ---
-function renderAll(){
-    renderStats();
-    renderSkills();
+    const roll = Math.random();
+    let rarityRoll;
+    if(roll<0.6) rarityRoll="common";
+    else if(roll<0.85) rarityRoll="rare";
+    else if(roll<0.97) rarityRoll="epic";
+    else rarityRoll="legendary";
+    const possible = items.filter(i=>i.rarity===rarityRoll);
+    const loot = possible[Math.floor(Math.random()*possible.length)];
+    character.inventory.push(loot);
+    const log = document.getElementById('combat-log');
+    log.innerHTML += `<p>Вы нашли предмет (${loot.rarity}): ${loot.name}!</p>`;
     renderInventory();
-    renderEnemy();
 }
 
-// --- Initialize inventory ---
-character.inventory.push(items[0],items[2],items[3]);
-renderAll();
+// --- Initialize ---
+updateHeader();
+updateStats();
+renderInventory();
 </script>
 </body>
 </html>
