@@ -2,105 +2,36 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>MMORPG Web Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile RPG</title>
 <style>
-  /* ===== Общие стили ===== */
-  body {
-    margin: 0;
-    font-family: 'Verdana', sans-serif;
-    background: #1e1e2f;
-    color: #f0f0f0;
-  }
-  #game { padding: 20px; max-width: 900px; margin: auto; }
-  h2, h3 { margin: 10px 0; }
-
-  button {
-    background: #333;
-    color: #f0f0f0;
-    border: 1px solid #555;
-    padding: 8px 12px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  button:hover { background: #444; }
-
-  .hidden { display: none; }
-
-  /* ===== Персонаж и инвентарь ===== */
-  #characterContainer { display: flex; align-items: flex-start; }
-  #characterImage {
-    width: 150px;
-    height: 150px;
-    position: relative;
-    margin-right: 20px;
-    border: 2px solid #555;
-    border-radius: 10px;
-    background: #111;
-  }
-  #inventory {
-    display: flex;
-    flex-wrap: wrap;
-    max-width: 600px;
-    border: 2px solid #555;
-    padding: 10px;
-    border-radius: 10px;
-    background: #111;
-  }
-  #inventory img {
-    width: 50px;
-    height: 50px;
-    margin: 3px;
-    border: 1px solid #777;
-    border-radius: 5px;
-    background: #222;
-  }
-
-  /* ===== Статы ===== */
-  #stats {
-    margin-top: 10px;
-    padding: 10px;
-    background: #222;
-    border-radius: 10px;
-    border: 2px solid #555;
-  }
-
-  /* ===== Локации ===== */
-  #map { margin-top: 20px; }
-  .location {
-    padding: 10px;
-    margin: 5px 0;
-    background: #222;
-    border: 2px solid #555;
-    border-radius: 8px;
-  }
-
-  /* ===== Бой ===== */
-  #battleLog {
-    height: 200px;
-    overflow-y: auto;
-    border: 2px solid #555;
-    padding: 5px;
-    margin-top: 10px;
-    background: #111;
-    border-radius: 8px;
-  }
-
-  /* ===== Квесты ===== */
-  #quests { margin-top: 10px; }
-  .quest {
-    padding: 8px;
-    margin: 5px 0;
-    background: #222;
-    border: 2px solid #555;
-    border-radius: 8px;
-  }
-
+body{font-family:sans-serif; margin:0; padding:0; background:#111; color:#eee;}
+#tabs{display:flex; justify-content:space-around; background:#222;}
+#tabs button{flex:1; padding:10px; background:#222; color:#eee; border:none;}
+#tabs button.active{background:#444;}
+.tabContent{display:none; padding:10px;}
+.tabContent.active{display:block;}
+#characterImage{position:relative;width:150px;height:150px;margin:10px auto;}
+#inventory img{width:50px;height:50px;margin:2px;}
+#battleLog, #chatLog{height:150px; overflow:auto; border:1px solid #555; padding:5px; background:#000; color:#0f0;}
+button{margin:2px; padding:5px;}
+#monsterHPContainer{width:100%; background:#333; height:20px; margin:5px 0; display:none;}
+#monsterHP{height:100%; background:red; width:0;}
 </style>
 </head>
 <body>
-<div id="game">
-  <!-- ===== Создание персонажа ===== -->
+
+<div id="tabs">
+  <button class="tabBtn active" onclick="switchTab('characterTab')">Персонаж</button>
+  <button class="tabBtn" onclick="switchTab('inventoryTab')">Инвентарь</button>
+  <button class="tabBtn" onclick="switchTab('locationTab')">Локации</button>
+  <button class="tabBtn" onclick="switchTab('battleTab')">Бой</button>
+  <button class="tabBtn" onclick="switchTab('chatTab')">Чат</button>
+</div>
+
+<!-- ------------------ Вкладки ------------------ -->
+
+<div id="characterTab" class="tabContent active">
   <div id="createCharacter">
     <h2>Создать персонажа</h2>
     <select id="classSelect">
@@ -111,50 +42,48 @@
     </select>
     <button onclick="createCharacter()">Создать</button>
   </div>
-
-  <!-- ===== Основная игра ===== -->
-  <div id="mainGame" class="hidden">
-    <div id="characterContainer">
-      <div id="characterImage"></div>
-      <div>
-        <div id="stats"></div>
-        <h3>Инвентарь</h3>
-        <div id="inventory"></div>
-      </div>
-    </div>
-
-    <div id="map">
-      <h3>Локации</h3>
-      <div class="location">
-        <button onclick="moveLocation()">Перейти к следующей локации</button>
-        <div id="currentLocation"></div>
-      </div>
-    </div>
-
-    <div id="quests">
-      <h3>Квесты</h3>
-      <button onclick="getQuest()">Получить квест</button>
-      <div id="questList"></div>
-    </div>
-
-    <div>
-      <h3>Бой</h3>
-      <button onclick="fightMonster()">Сражение с монстром</button>
-      <div id="battleLog"></div>
-    </div>
+  <div id="mainGameCharacter" class="hidden">
+    <div id="characterImage"></div>
+    <div id="stats"></div>
   </div>
 </div>
 
+<div id="inventoryTab" class="tabContent">
+  <h3>Инвентарь</h3>
+  <div id="inventory"></div>
+</div>
+
+<div id="locationTab" class="tabContent">
+  <button onclick="moveLevel(-1)">⬅ Назад по уровню</button>
+  <button onclick="moveLevel(1)">Вперед по уровню ➡</button>
+  <div id="locationInfo"></div>
+</div>
+
+<div id="battleTab" class="tabContent">
+  <button onclick="fightMonster()">Сражение с монстром</button>
+  <div id="monsterHPContainer"><div id="monsterHP"></div></div>
+  <div id="battleLog"></div>
+</div>
+
+<div id="chatTab" class="tabContent">
+  <div id="chatLog"></div>
+  <input type="text" id="chatInput" placeholder="Сообщение...">
+  <button onclick="sendMessage()">Отправить</button>
+</div>
+
 <script>
-/* ===== Игрок и классы ===== */
+// ----- Игрок -----
 let player = null;
-let currentLocationIndex = 0;
+let currentDungeonIndex=0;
+let currentLevelIndex=0;
+let monsterHPValue=0;
+let monsterMaxHP=0;
 
 const classes = {
-  warrior:{hp:100, attack:15, crit:5, speed:5, mana:0, magAttack:0},
-  mage:{hp:70, attack:5, crit:5, speed:5, mana:50, magAttack:15},
-  archer:{hp:80, attack:10, crit:10, speed:8, mana:0, magAttack:0},
-  assassin:{hp:75, attack:12, crit:15, speed:10, mana:0, magAttack:0}
+  warrior:{hp:100, attack:10, crit:5, speed:5, mana:0, skills:['Удар','Сильный удар']},
+  mage:{hp:70, attack:5, crit:5, speed:5, mana:50, skills:['Огненный шар','Ледяной снаряд']},
+  archer:{hp:80, attack:8, crit:10, speed:7, mana:0, skills:['Стрела','Прицельный выстрел']},
+  assassin:{hp:75, attack:12, crit:15, speed:10, mana:0, skills:['Удар в спину','Яд']},
 };
 
 const equipment = {
@@ -164,21 +93,25 @@ const equipment = {
   assassin:{weapon:['Кинжал','Короткий меч'], armor:['Легкая броня','Маска']}
 };
 
-/* ===== Локации и монстры ===== */
-const locations = [
-  {name:'Лесная тропа', monsters:['Гоблин','Волк']},
-  {name:'Подземелье', monsters:['Паук','Скелет']},
-  {name:'Таверна', monsters:[]}
+// ----- Подземелья -----
+const dungeons=[
+  {name:'Лесная тропа', levels:[
+    {level:1, monsters:['Гоблин','Крысолов']},
+    {level:2, monsters:['Гоблин','Волк']},
+    {level:3, monsters:['Гоблин','Орк']},
+    {level:4, monsters:['Волк','Орк']},
+    {level:5, monsters:['Орк','Тролль']}
+  ]},
+  {name:'Подземелье', levels:[
+    {level:1, monsters:['Паук','Скелет']},
+    {level:2, monsters:['Паук','Зомби']},
+    {level:3, monsters:['Скелет','Зомби']},
+    {level:4, monsters:['Скелет','Призрак']},
+    {level:5, monsters:['Призрак','Тёмный рыцарь']}
+  ]}
 ];
 
-/* ===== Квесты ===== */
-const quests = {
-  'Лесная тропа': [{name:'Убей 3 гоблинов', reward:{exp:20, gold:10, item:{name:'Деревянный меч', type:'weapon', rarity:'common'}}}],
-  'Подземелье': [{name:'Убей пауков', reward:{exp:25, gold:15}}],
-  'Таверна': [{name:'Отдохни', reward:{exp:5, gold:0}}]
-};
-
-/* ===== Сохранение ===== */
+// ----- Сохранение -----
 function savePlayer(){ localStorage.setItem('rpgPlayer',JSON.stringify(player)); }
 function loadPlayer(){
   const p = localStorage.getItem('rpgPlayer');
@@ -186,150 +119,94 @@ function loadPlayer(){
 }
 loadPlayer();
 
-/* ===== Создание персонажа ===== */
+// ----- Создание -----
 function createCharacter(){
   const cls = document.getElementById('classSelect').value;
   const stats = classes[cls];
   player = {
-    class:cls,
-    level:1,
-    exp:0,
-    hp:stats.hp,
-    attack:stats.attack,
-    crit:stats.crit,
-    speed:stats.speed,
-    mana:stats.mana,
-    magAttack:stats.magAttack,
-    inventory:[],
-    weapon:null,
-    armor:null,
-    gold:0
+    class:cls, level:1, exp:0, hp:stats.hp, attack:stats.attack, crit:stats.crit, speed:stats.speed, mana:stats.mana,
+    skills:stats.skills,
+    inventory:[], weapon:null, armor:null, gold:0
   };
   savePlayer();
   showMainGame();
   updateStatsUI();
-  updateInventoryUI();
   updateCharacterDisplay();
-  updateLocationUI();
 }
 
-/* ===== UI ===== */
+// ----- UI -----
+function switchTab(tabId){
+  document.querySelectorAll('.tabContent').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
 function showMainGame(){
   document.getElementById('createCharacter').classList.add('hidden');
-  document.getElementById('mainGame').classList.remove('hidden');
+  document.getElementById('mainGameCharacter').classList.remove('hidden');
 }
 
 function updateStatsUI(){
-  const s = document.getElementById('stats');
-  s.innerHTML = `
-    <b>Класс:</b> ${player.class}<br>
-    <b>Уровень:</b> ${player.level} | EXP: ${player.exp}<br>
-    <b>HP:</b> ${player.hp}<br>
-    <b>Атака:</b> ${player.attack} | <b>Крит:</b> ${player.crit} | <b>Скорость:</b> ${player.speed} | <b>Мана:</b> ${player.mana} | <b>Маг. Атака:</b> ${player.magAttack}<br>
-    <b>Золото:</b> ${player.gold}
-  `;
+  const statsDiv=document.getElementById('stats');
+  statsDiv.innerHTML=`Класс: ${player.class}<br>HP: ${player.hp}<br>Атака: ${player.attack} | Крит: ${player.crit} | Скорость: ${player.speed} | Мана: ${player.mana}<br>Золото: ${player.gold}`;
 }
 
 function updateInventoryUI(){
-  const inv = document.getElementById('inventory');
-  inv.innerHTML='';
+  const inv=document.getElementById('inventory'); inv.innerHTML='';
   player.inventory.forEach(item=>{
-    const img = document.createElement('img');
-    img.src=`icons/${item.name}.png`;
-    img.title=`${item.name} (${item.rarity||'common'})`;
-    inv.appendChild(img);
+    const img=document.createElement('img'); img.src=`icons/${item.name}.png`; img.title=`${item.name}`; inv.appendChild(img);
   });
 }
 
 function updateCharacterDisplay(){
-  const div = document.getElementById('characterImage');
-  div.innerHTML='';
+  const div=document.getElementById('characterImage'); div.innerHTML='';
   const charDiv=document.createElement('div');
   charDiv.style.width='100%'; charDiv.style.height='100%';
   charDiv.style.background=`url('icons/${player.class}.png') center/contain no-repeat`;
   div.appendChild(charDiv);
-
-  if(player.weapon){
-    const wDiv=document.createElement('div');
-    wDiv.style.width='100%'; wDiv.style.height='100%'; wDiv.style.position='absolute';
-    wDiv.style.background=`url('icons/${player.weapon}.png') center/contain no-repeat`;
-    div.appendChild(wDiv);
-  }
-
-  if(player.armor){
-    const aDiv=document.createElement('div');
-    aDiv.style.width='100%'; aDiv.style.height='100%'; aDiv.style.position='absolute';
-    aDiv.style.background=`url('icons/${player.armor}.png') center/contain no-repeat`;
-    div.appendChild(aDiv);
-  }
+  if(player.weapon){ const wDiv=document.createElement('div'); wDiv.style.cssText='width:100%;height:100%;position:absolute;'; wDiv.style.background=`url('icons/${player.weapon}.png') center/contain no-repeat`; div.appendChild(wDiv);}
+  if(player.armor){ const aDiv=document.createElement('div'); aDiv.style.cssText='width:100%;height:100%;position:absolute;'; aDiv.style.background=`url('icons/${player.armor}.png') center/contain no-repeat`; div.appendChild(aDiv);}
 }
 
+// ----- Локации -----
+function moveLevel(step){
+  currentLevelIndex+=step; if(currentLevelIndex<0) currentLevelIndex=0; if(currentLevelIndex>4) currentLevelIndex=4; updateLocationUI();
+}
 function updateLocationUI(){
-  const loc = locations[currentLocationIndex];
-  document.getElementById('currentLocation').innerText = `Текущая локация: ${loc.name}`;
+  const dungeon=dungeons[currentDungeonIndex]; const level=dungeon.levels[currentLevelIndex];
+  document.getElementById('locationInfo').innerHTML=`<b>Локация:</b> ${dungeon.name}<br><b>Уровень:</b> ${level.level}<br><b>Монстры:</b> ${level.monsters.join(', ')}`;
 }
 
-/* ===== Передвижение ===== */
-function moveLocation(){
-  currentLocationIndex = (currentLocationIndex+1) % locations.length;
-  updateLocationUI();
-}
-
-/* ===== Квесты ===== */
-function getQuest(){
-  const locName = locations[currentLocationIndex].name;
-  const questList = quests[locName] || [];
-  if(questList.length===0){ alert('Нет заданий'); return; }
-  const quest = questList[Math.floor(Math.random()*questList.length)];
-  alert(`Задание: ${quest.name}`);
-  rewardQuest(quest.reward);
-}
-
-function rewardQuest(reward){
-  if(reward.exp) player.exp += reward.exp;
-  if(reward.gold) player.gold += reward.gold;
-  if(reward.item) player.inventory.push(reward.item);
-  updateStatsUI();
-  updateInventoryUI();
-  savePlayer();
-}
-
-/* ===== Бой ===== */
+// ----- Бой -----
 function fightMonster(){
-  const loc = locations[currentLocationIndex];
-  if(loc.monsters.length===0){ alert('Здесь нет монстров'); return; }
-  const monster = loc.monsters[Math.floor(Math.random()*loc.monsters.length)];
-  const level = Math.floor(Math.random()*5)+1;
-  let monsterHP = 20*level;
-  addBattleLog(`Встречен ${monster} уровня ${level} с ${monsterHP} HP`);
+  const dungeon=dungeons[currentDungeonIndex]; const level=dungeon.levels[currentLevelIndex];
+  const monster=level.monsters[randomInt(0,level.monsters.length-1)];
+  const monsterLvl=level.level;
+  monsterMaxHP=20*monsterLvl; monsterHPValue=monsterMaxHP;
+  document.getElementById('monsterHPContainer').style.display='block';
+  document.getElementById('monsterHP').style.width='100%';
+  addBattleLog(`Встречен ${monster} уровня ${monsterLvl} с ${monsterHPValue} HP`);
 
-  const damage = player.attack + randomInt(0,5);
-  monsterHP -= damage;
-  addBattleLog(`Вы наносите ${damage} урона. Осталось HP монстра: ${monsterHP}`);
-
-  const monsterAttack = 5*level;
-  player.hp -= monsterAttack;
-  addBattleLog(`Монстр атакует! Урон: ${monsterAttack}. Ваше HP: ${player.hp}`);
-
-  if(player.hp<=0){ alert('Вы погибли!'); localStorage.removeItem('rpgPlayer'); location.reload(); return; }
-
-  if(monsterHP<=0){
-    addBattleLog(`${monster} побежден! Вы получаете ${level*2} опыта`);
-    player.exp += level*2;
-    savePlayer();
-    updateStatsUI();
-  }
+  const battleInterval=setInterval(()=>{
+    const skill=player.skills[randomInt(0,player.skills.length-1)];
+    const damage=player.attack+randomInt(0,5); monsterHPValue-=damage; if(monsterHPValue<0) monsterHPValue=0;
+    document.getElementById('monsterHP').style.width=(monsterHPValue/monsterMaxHP*100)+'%';
+    addBattleLog(`Вы используете ${skill} и наносите ${damage} урона`);
+    const monsterAttack=5*monsterLvl; player.hp-=monsterAttack; if(player.hp<0) player.hp=0; updateStatsUI(); addBattleLog(`Монстр атакует! Урон: ${monsterAttack}. HP: ${player.hp}`);
+    if(player.hp<=0){ alert('Вы погибли!'); localStorage.removeItem('rpgPlayer'); location.reload(); clearInterval(battleInterval); return; }
+    if(monsterHPValue<=0){ addBattleLog(`${monster} побежден! Вы получаете ${monsterLvl*2} опыта`); player.exp+=monsterLvl*2; savePlayer(); updateStatsUI(); clearInterval(battleInterval);}
+  },1000);
 }
-
-function addBattleLog(msg){
-  const log = document.getElementById('battleLog');
-  log.innerHTML += msg + '<br>';
-  log.scrollTop = log.scrollHeight;
-}
-
-/* ===== Вспомогательные ===== */
+function addBattleLog(msg){ const log=document.getElementById('battleLog'); log.innerHTML+=msg+'<br>'; log.scrollTop=log.scrollHeight; }
 function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
+// ----- Чат -----
+function sendMessage(){
+  const msg=document.getElementById('chatInput').value; if(!msg) return;
+  const log=document.getElementById('chatLog'); log.innerHTML+=`<b>Вы:</b> ${msg}<br>`; log.scrollTop=log.scrollHeight;
+  document.getElementById('chatInput').value='';
+}
 </script>
 </body>
 </html>
